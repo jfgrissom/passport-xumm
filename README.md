@@ -1,2 +1,3 @@
-# xumm-passport-js-strategy
-A lib to quickly implement Xumm wallet for Passport.js.
+# Xumm authentication strategy for Passport
+
+A lib to quickly implement a Xumm wallet strategy for Passport.

@@ -1,0 +1,42 @@
+{
+  "devDependencies": {
+    "@types/node": "^16.10.9",
+    "tslint": "^6.1.3",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "xumm-sdk": "^1.0.1"
+  },
+  "name": "passport-xumm",
+  "description": "A lib to quickly implement Xumm wallet for Passport.js.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo 'Please create some tests.'",
+    "clean": "rm -rf dist/*",
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfgrissom/passport-xumm.git"
+  },
+  "keywords": [
+    "xumm",
+    "passport",
+    "strategy",
+    "passportjs"
+  ],
+  "author": "jfgrissom@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jfgrissom/passport-xumm/issues"
+  },
+  "homepage": "https://github.com/jfgrissom/passport-xumm#readme"
+}
