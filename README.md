@@ -2,6 +2,8 @@
 
 A lib to quickly implement a Xumm wallet strategy for Passport.
 
+**NOTE:** This is being developed and won't be considered stable until version 1.0.0.
+
 ## API Key
 
 Before you can use this you'll need to get an API key from Xumm.
@@ -9,6 +11,8 @@ Before you can use this you'll need to get an API key from Xumm.
 Instructions for [setting up Xumm API keys is here](https://dev.to/wietse/xumm-sdk-1-get-your-xumm-api-credentials-5c3i).
 
 Once you have a public (API Key) and private (API Secret) key pair you'll want to add them to a `.env` file and place it in the root of your project. Usage for this file come from [dotenv](https://www.npmjs.com/package/dotenv).
+
+This dependency will be removed once the package is ready to ship v1.0.0.
 
 ```
 XUMM_PUB_KEY=<YOUR-XUMM-API-KEY-HERE>
@@ -36,4 +40,3 @@ XUMM_PVT_KEY=<YOUR-XUMM-API-SECRET-HERE>
 ## App Integration
 
 ## Overriding Default Templates
-
