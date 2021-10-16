@@ -45,15 +45,15 @@ export class XummStrategy extends PassportStrategy {
     this.pubKey = pubKey
     this.pvtKey = pvtKey
     this.name = 'xumm'
-
   }
 
   public pubKey: string
   private pvtKey: string
   public name: string
 
-  // 1. Get a QR code for the view.
-  // 2. 
+  // Where this fits into the entire picture.
+  // This function is called once the QR code is read and a 
+  // response has been sent to the backend.
 
   // Implement a superclass method override.
   authenticate(req: {}, options: {}) { }
