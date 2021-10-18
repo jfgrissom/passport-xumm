@@ -33,7 +33,14 @@ export class XummStrategy extends PassportStrategy {
   // This runs a data base check that the consumer passes in.
   authenticate = (req: {}, options: {}) => {}
 
-  presetQrCode = async () => {
+  // Using this external "dependency proxy" pattern to separated this in
+  // order to remove this implementation detail dependency on Xumm.
+  // Now it can more be easily overridden without mocking the entire XummSdk.
+  createPayload = async (request: XummTypes.XummPostPayloadBodyJson) => {
+    return await this.sdk.payload.create(request)
+  }
+
+  fetchQrCode = async () => {
     const { sdk } = this
     const request: XummTypes.XummPostPayloadBodyJson = {
       options: {
@@ -45,7 +52,7 @@ export class XummStrategy extends PassportStrategy {
       }
     }
 
-    const response = await sdk.payload.create(request)
+    const response = await this.createPayload(request)
     return response
   }
 }
