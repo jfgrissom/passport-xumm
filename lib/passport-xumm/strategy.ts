@@ -2,11 +2,8 @@ import { Strategy as PassportStrategy } from 'passport-strategy'
 
 //TODO: These env vars need to be passed to the strategy when it's initialized.
 import { XummSdk, XummTypes } from 'xumm-sdk'
-import * as dotenv from 'dotenv'
 
-dotenv.config()
-
-interface iXummStrategyProps {
+export interface iXummStrategyProps {
   pubKey: string
   pvtKey: string
   timeout?: number
