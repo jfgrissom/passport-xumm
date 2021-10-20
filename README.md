@@ -21,6 +21,8 @@ XUMM_PVT_KEY=<YOUR-XUMM-API-SECRET-HERE>
 
 ## End To End Authentication Workflow
 
+There is a diagram of the following sequence in the docs directory of this repo.
+
 1. End user has opted to login through your UI.
 1. Your UI presents a spinner and then makes a call out to your backend via a poller (or websocket).
 1. Your backend then creates a UniqueID and binds it to your Session model.
@@ -32,6 +34,10 @@ XUMM_PVT_KEY=<YOUR-XUMM-API-SECRET-HERE>
 1. Your API endpoint receives the payload from Xumm then checks back with Xumm to be sure it actually came from Xumm. This is what the "Authenticate" portion of the this lib handles.
 1. Your backend creates a new unique SessionID record and persists it. [A new session is a best practice based on NIST recommendations](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63b.pdf). The templates provided in this repo reinforce this recommendation.
 1. Your UI receives this success (and new SessionID) through the poller (or websocket), closes the connection, and redirects your user to an auth success page.
+
+## Mandatory
+
+1. Your code must provide a UniqueID to the function `Strategy.fetchQrCode()` and that same UniqueID must be bound to the user data you pass to `Strategy.authenticate()`.
 
 ## Optional
 
