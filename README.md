@@ -19,15 +19,19 @@ XUMM_PUB_KEY=<YOUR-XUMM-API-KEY-HERE>
 XUMM_PVT_KEY=<YOUR-XUMM-API-SECRET-HERE>
 ```
 
-## Authentication Workflow
+## End To End Authentication Workflow
 
-1. End user has opted to login.
-1. Your UI presents a spinner and then makes a call out to your backend via a websocket.
-1. Your backend creates a unique session ID record and stores it. Then it reaches out to the Xumm service and gets a payload that has a QR code and link details for people who can't use the QR code. It takes that information and puts it into a "SignInFormDatum"
-1. The backend returns the "SignInFormDatum" to your frontend.
-1. Your frontend renders the "SignInFormDatum" and the user is presented with a QR code and link to follow if they can't use the QR code.
+1. End user has opted to login through your UI.
+1. Your UI presents a spinner and then makes a call out to your backend via a poller (or websocket).
+1. Your backend then creates a UniqueID and binds it to your Session model.
+1. Your backend then reaches out to the Xumm service (providing the UniqueID not an existing SessionID) and gets a payload that has a QR code and link details for people who can't use the QR code.
+1. Your backend then takes that information and puts it into a "SignInFormData".
+1. The backend returns the "SignInFormData" to your frontend.
+1. Your frontend renders the "SignInFormData" and the user is presented with a QR code and link to follow if they can't use the QR code (if they are on the same device the QR code is presented on they can't scan it).
 1. Once the user signs the request on their Xumm Mobile the Xumm service will send your callback endpoint a successful SignIn message.
-1. Your UI receives this success through the websocket, closes the connection, and redirects your user to an auth success page.
+1. Your API endpoint receives the payload from Xumm then checks back with Xumm to be sure it actually came from Xumm. This is what the "Authenticate" portion of the this lib handles.
+1. Your backend creates a new unique SessionID record and persists it. [A new session is a best practice based on NIST recommendations](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63b.pdf). The templates provided in this repo reinforce this recommendation.
+1. Your UI receives this success (and new SessionID) through the poller (or websocket), closes the connection, and redirects your user to an auth success page.
 
 ## Optional
 

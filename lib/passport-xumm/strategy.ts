@@ -46,9 +46,19 @@ export class XummStrategy extends PassportStrategy {
       options: {
         submit: false,
         expire: 240
+        /* TODO: This value should be optionally passed in from app.
+        return_url: {
+          web: 'http://TODO'
+        }
+        */
       },
       txjson: {
         TransactionType: 'SignIn'
+        /* TODO: This mandatory value should be passed in from the app User Model UniqueID.
+        custom_meta: {
+          identifier: 'Some Identifier'
+        }
+        */
       }
     }
 
