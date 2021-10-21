@@ -9,6 +9,12 @@ export interface iXummStrategyProps {
   timeout?: number
 }
 
+export interface iFetchQRCodeProps {
+  web?: string
+  app?: string
+  identifier: string
+}
+
 export class XummStrategy extends PassportStrategy {
   constructor(props: iXummStrategyProps) {
     super()
@@ -29,36 +35,28 @@ export class XummStrategy extends PassportStrategy {
   public name: string
   private sdk: XummSdk
 
-  // Implement a superclass method override.
-  // This runs a data base check that the consumer passes in.
   authenticate = (req: {}, options: {}) => {}
 
-  // Using this external "dependency proxy" pattern to separated this in
-  // order to remove this implementation detail dependency on Xumm.
-  // Now it can more be easily overridden without mocking the entire XummSdk.
   createPayload = async (request: XummTypes.XummPostPayloadBodyJson) => {
     return await this.sdk.payload.create(request)
   }
 
-  fetchQrCode = async () => {
-    const { sdk } = this
+  fetchQrCode = async (props: iFetchQRCodeProps) => {
+    const { web, app, identifier } = props
     const request: XummTypes.XummPostPayloadBodyJson = {
       options: {
         submit: false,
-        expire: 240
-        /* TODO: This value should be optionally passed in from app.
+        expire: 240,
         return_url: {
-          web: 'http://TODO'
+          web,
+          app
         }
-        */
       },
       txjson: {
         TransactionType: 'SignIn'
-        /* TODO: This mandatory value should be passed in from the app User Model UniqueID.
-        custom_meta: {
-          identifier: 'Some Identifier'
-        }
-        */
+      },
+      custom_meta: {
+        identifier
       }
     }
 

@@ -19,6 +19,7 @@
     "nyc": "^15.1.0",
     "passport-strategy": "^1.0.0",
     "ts-node": "^10.3.0",
+    "uuid": "^8.3.2",
     "xumm-sdk": "^1.0.1"
   },
   "name": "passport-xumm",
@@ -35,7 +36,9 @@
     "prebuild": "npm run clean",
     "build": "tsc",
     "trigger": "node dist/index.js",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "predev": "tsc devhelper.ts --resolveJsonModule",
+    "dev": "node devhelper.js"
   },
   "repository": {
     "type": "git",
