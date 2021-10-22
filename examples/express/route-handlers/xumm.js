@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -41,13 +52,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 exports.xumm = void 0;
 var axios_1 = __importDefault(require("axios"));
+var uuid_1 = require("uuid");
+// Once a request comes in check with Xumm to be sure the payload is real.
 var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var userId, url, options, response;
+    var userId, user, userIndex, url, options, response, sessionId, updatedUser;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                console.log(req.body);
+                console.log("Request From Xumm: " + req.body);
                 userId = req.body.custom_meta.identifier;
+                user = req.context.users.find(function (user) {
+                    if ((user.id = userId))
+                        return user;
+                });
+                userIndex = req.context.users.findIndex(function (user) {
+                    if ((user.id = userId))
+                        return user;
+                });
                 if (!userId) return [3 /*break*/, 2];
                 url = "https://xumm.app/api/v1/platform/payload/ci/" + userId;
                 options = {
@@ -61,11 +82,22 @@ var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
                 response = _a.sent();
                 if (response.data.meta.exists === true &&
                     response.data.meta.resolved === true) {
-                    console.log('Validate your session model.');
-                    console.log(response.data);
+                    console.log('Payload received is authentic: ');
+                    console.log('Creating new session and attaching public wallet data.');
+                    sessionId = (0, uuid_1.v4)();
+                    updatedUser = __assign(__assign({}, user), { session: {
+                            id: sessionId
+                        }, wallets: [
+                            { provider: 'xumm', address: "" + response.data.response.account }
+                        ] });
+                    // Add the updated user to the "database".
+                    req.context.users[userIndex] = updatedUser;
+                    console.log("Current DB State: " + JSON.stringify(req.context.users));
                 }
                 _a.label = 2;
             case 2:
+                // This is what gets returned to the caller (Xumm Service)
+                // because we received their payload.
                 res.sendStatus(200);
                 return [2 /*return*/];
         }

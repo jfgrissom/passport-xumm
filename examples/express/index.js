@@ -23,15 +23,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var express_1 = __importDefault(require("express"));
+var express_request_context_1 = __importDefault(require("express-request-context"));
 var dotenv = __importStar(require("dotenv"));
 dotenv.config();
 var qr_1 = require("./route-handlers/qr");
 var xumm_1 = require("./route-handlers/xumm");
+// Configure the service.
 var port = 3000;
 var api = (0, express_1["default"])();
+// Apply middlware to the service.
 api.use(express_1["default"].json());
+api.use((0, express_request_context_1["default"])());
+// Local routes here.
 api.get('/qr', qr_1.qr);
 api.post('/xumm', xumm_1.xumm);
+// Start the API as a web service.
 api.listen(port, function () {
     console.log("Example express app listening at http://localhost:" + port);
 });

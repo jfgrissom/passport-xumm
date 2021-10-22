@@ -37,20 +37,38 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.qr = void 0;
-var passport_xumm_1 = require("../../../dist/lib/passport-xumm");
 var uuid_1 = require("uuid");
+var passport_xumm_1 = require("../../../dist/lib/passport-xumm");
+// Creates a simple database for use in development.
+var addUsersToContext = function (req) {
+    var fakerBase = {
+        users: []
+    };
+    req.context.users = fakerBase;
+};
 var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var pubKey, pvtKey, xummStrategyProps, userId, fetchQRCodeProps, strategy, qrCodeData;
+    var pubKey, pvtKey, userId, sessionId, anonymousUser, xummStrategyProps, fetchQRCodeProps, strategy, qrCodeData;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 pubKey = process.env.XUMM_PUB_KEY;
                 pvtKey = process.env.XUMM_PVT_KEY;
+                // Pull in the "database".
+                addUsersToContext(req);
+                userId = (0, uuid_1.v4)();
+                sessionId = (0, uuid_1.v4)();
+                anonymousUser = {
+                    name: 'Anonymous User',
+                    id: userId,
+                    session: { id: sessionId }
+                };
+                // Add this anonymous user to the "database".
+                req.context.users.push(anonymousUser);
+                console.log("Current DB State: " + JSON.stringify(req.context.users));
                 xummStrategyProps = {
                     pubKey: pubKey,
                     pvtKey: pvtKey
                 };
-                userId = (0, uuid_1.v4)();
                 fetchQRCodeProps = {
                     web: 'http://localhost:3000',
                     identifier: userId
