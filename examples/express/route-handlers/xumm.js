@@ -35,34 +35,40 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
-var passport_xumm_1 = require("./lib/passport-xumm");
-var dotenv = require("dotenv");
-var uuid_1 = require("uuid");
-dotenv.config();
-var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var pubKey, pvtKey, xummStrategyProps, userId, fetchQRCodeProps, strategy, qrCodeData;
+exports.xumm = void 0;
+var axios_1 = __importDefault(require("axios"));
+var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var userId, url, options, response;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                pubKey = process.env.XUMM_PUB_KEY;
-                pvtKey = process.env.XUMM_PVT_KEY;
-                xummStrategyProps = {
-                    pubKey: pubKey,
-                    pvtKey: pvtKey
+                console.log(req.body);
+                userId = req.body.custom_meta.identifier;
+                if (!userId) return [3 /*break*/, 2];
+                url = "https://xumm.app/api/v1/platform/payload/ci/" + userId;
+                options = {
+                    headers: {
+                        'X-API-Key': process.env.XUMM_PUB_KEY,
+                        'X-API-Secret': process.env.XUMM_PVT_KEY
+                    }
                 };
-                userId = (0, uuid_1.v4)();
-                fetchQRCodeProps = {
-                    web: 'http://localhost:3000',
-                    identifier: userId
-                };
-                strategy = new passport_xumm_1.XummStrategy(xummStrategyProps);
-                return [4 /*yield*/, strategy.fetchQrCode(fetchQRCodeProps)];
+                return [4 /*yield*/, axios_1["default"].get(url, options)];
             case 1:
-                qrCodeData = _a.sent();
-                console.log(qrCodeData);
+                response = _a.sent();
+                if (response.data.meta.exists === true &&
+                    response.data.meta.resolved === true) {
+                    console.log('Validate your session model.');
+                    console.log(response.data);
+                }
+                _a.label = 2;
+            case 2:
+                res.sendStatus(200);
                 return [2 /*return*/];
         }
     });
 }); };
-main();
+exports.xumm = xumm;
