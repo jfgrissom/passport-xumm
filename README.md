@@ -1,6 +1,8 @@
 # Xumm authentication strategy for Passport
 
-A lib to quickly implement a Xumm wallet strategy for Passport.
+A lib to quickly implement a Xumm wallet strategy for Passport. Most of the work related to Auth is handled by Xumm's web services so this strategy provides you a quick way to interact with Xumm's service specifically to signIn.
+
+This strategy doesn't handle any other signing feature from Xumm other than "SignIn".
 
 **NOTE:** This is being developed and won't be considered stable until version 1.0.0.
 
@@ -18,6 +20,10 @@ This dependency will be removed once the package is ready to ship v1.0.0.
 XUMM_PUB_KEY=<YOUR-XUMM-API-KEY-HERE>
 XUMM_PVT_KEY=<YOUR-XUMM-API-SECRET-HERE>
 ```
+
+## Examples
+
+There is a directory in the repository called examples. Currently it has an example for express.js that works from end to end.
 
 ## Auth Token
 

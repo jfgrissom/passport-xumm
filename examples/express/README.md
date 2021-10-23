@@ -2,9 +2,23 @@
 
 The contents of this directory is just an example to get you started when using this library. It's useful for development if you want to help to improve this also.
 
+## Workflow
+
+1. Use a tool like Postman to make a request to `http://locahost:3000/qr`. This will return a response that contains QR code data from Xumm.
+2. Scan the QR with Xumm and sign the transaction.
+3. Retrieve the payload send to your the webhook you have configured in the Xumm dashboard.
+4. You can use that payload again in Postman to test our your application.
+
+## Using ngrok.
+
+If you're developing locally you can setup ngrok to tunnel to your local machine (https://dashboard.ngrok.com/get-started/tutorials).
+
+Change your webhook endpoint in the Xumm dashboard to receive Xumm payloads directly from their web service.
+
 ## Understanding Payloads
 
 Example request body received from Xumm Service once a QR code is signed. This request comes in from Xumm Service. You define it in the Xumm App Dashboard. The property it's called the "Webhook URL for callbacks".
+
 ```
 {
   "meta": {
@@ -37,6 +51,7 @@ Example request body received from Xumm Service once a QR code is signed. This r
 ```
 
 Example response from Xumm Service when calling https://xumm.app/api/v1/platform/payload/ci/:
+
 ```
 {
   "meta": {
