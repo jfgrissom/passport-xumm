@@ -23,7 +23,9 @@ XUMM_PVT_KEY=<YOUR-XUMM-API-SECRET-HERE>
 
 ## Examples
 
-There is a directory in the repository called examples. Currently it has an example for express.js that works from end to end.
+There is a directory in the repository called examples. Currently it has an example for express.js that works from end to end. Keep in mind this example is just a skeleton API only. There are no front end components.
+
+Using it will require you to use a tool like Postman and the Xumm Dashboard to interact.
 
 ## Auth Token
 

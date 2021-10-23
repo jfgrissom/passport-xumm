@@ -1,4 +1,5 @@
 import { Strategy as PassportStrategy } from 'passport-strategy'
+import axios, { AxiosRequestConfig } from 'axios'
 
 //TODO: These env vars need to be passed to the strategy when it's initialized.
 import { XummSdk, XummTypes } from 'xumm-sdk'
@@ -9,11 +10,23 @@ export interface iXummStrategyProps {
   timeout?: number
 }
 
+export interface XummResponse {
+  data: XummTypes.XummGetPayloadResponse
+}
+
 export interface iFetchQRCodeProps {
   web?: string
   app?: string
   identifier: string
 }
+
+export interface iAuthenticateProps {
+  identifier: string
+  pvtKey: string
+  pubKey: string
+}
+
+const BAD_REQUEST = 400
 
 export class XummStrategy extends PassportStrategy {
   constructor(props: iXummStrategyProps) {
@@ -35,7 +48,33 @@ export class XummStrategy extends PassportStrategy {
   public name: string
   private sdk: XummSdk
 
-  authenticate = (req: {}, options: {}) => {}
+  authenticate = async (req: any, options: iAuthenticateProps) => {
+    const { identifier, pubKey, pvtKey } = options
+    const url = `https://xumm.app/api/v1/platform/payload/ci/${identifier}`
+    const axiosConfig: AxiosRequestConfig = {
+      headers: {
+        'X-API-Key': pubKey,
+        'X-API-Secret': pvtKey
+      }
+    }
+
+    const response: XummResponse = await axios.get(url, axiosConfig)
+    if (
+      response.data.meta.exists === true &&
+      response.data.meta.resolved === true
+    ) {
+      // At this point there is a token.
+      this.pass()
+    } else {
+      this.fail(
+        {
+          message:
+            'Payload received could not be verified with Xumm web service.'
+        },
+        BAD_REQUEST
+      )
+    }
+  }
 
   createPayload = async (request: XummTypes.XummPostPayloadBodyJson) => {
     return await this.sdk.payload.create(request)
