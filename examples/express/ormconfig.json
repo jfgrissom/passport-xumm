@@ -1,0 +1,8 @@
+[
+  {
+    "type": "sqlite",
+    "database": "./data/db.sqlite",
+    "entities": ["User", "Token", "Session"],
+    "logging": true
+  }
+]

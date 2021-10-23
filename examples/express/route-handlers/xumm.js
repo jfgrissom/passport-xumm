@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -52,24 +41,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 exports.xumm = void 0;
 var axios_1 = __importDefault(require("axios"));
-var uuid_1 = require("uuid");
+var typeorm_1 = require("typeorm");
+var user_1 = require("../entity/user");
+var token_1 = require("../entity/token");
 // Once a request comes in check with Xumm to be sure the payload is real.
 var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var userId, user, userIndex, url, options, response, sessionId, updatedUser;
+    var userRepository, tokenRepository, userId, url, options, response, user, token, savedToken;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                console.log("Request From Xumm: " + req.body);
+                console.log("Request From Xumm: " + JSON.stringify(req.body));
+                return [4 /*yield*/, (0, typeorm_1.getConnection)().getRepository(user_1.User)];
+            case 1:
+                userRepository = _a.sent();
+                return [4 /*yield*/, (0, typeorm_1.getConnection)().getRepository(token_1.Token)
+                    // This userID should be something your application passed
+                    // to Xumm when you requested the QR code.
+                ];
+            case 2:
+                tokenRepository = _a.sent();
                 userId = req.body.custom_meta.identifier;
-                user = req.context.users.find(function (user) {
-                    if ((user.id = userId))
-                        return user;
-                });
-                userIndex = req.context.users.findIndex(function (user) {
-                    if ((user.id = userId))
-                        return user;
-                });
-                if (!userId) return [3 /*break*/, 2];
+                if (!userId) return [3 /*break*/, 6];
                 url = "https://xumm.app/api/v1/platform/payload/ci/" + userId;
                 options = {
                     headers: {
@@ -78,24 +70,28 @@ var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
                     }
                 };
                 return [4 /*yield*/, axios_1["default"].get(url, options)];
-            case 1:
+            case 3:
                 response = _a.sent();
-                if (response.data.meta.exists === true &&
-                    response.data.meta.resolved === true) {
-                    console.log('Payload received is authentic: ');
-                    console.log('Creating new session and attaching public wallet data.');
-                    sessionId = (0, uuid_1.v4)();
-                    updatedUser = __assign(__assign({}, user), { session: {
-                            id: sessionId
-                        }, wallets: [
-                            { provider: 'xumm', address: "" + response.data.response.account }
-                        ] });
-                    // Add the updated user to the "database".
-                    req.context.users[userIndex] = updatedUser;
-                    console.log("Current DB State: " + JSON.stringify(req.context.users));
-                }
-                _a.label = 2;
-            case 2:
+                if (!(response.data.meta.exists === true &&
+                    response.data.meta.resolved === true)) return [3 /*break*/, 6];
+                console.log('Payload received is authentic: ');
+                console.log('Creating new session and attaching public wallet data.');
+                return [4 /*yield*/, userRepository.findOne({ id: userId })
+                    // Create a token.
+                ];
+            case 4:
+                user = _a.sent();
+                token = new token_1.Token();
+                token.hashedToken = req.body.userToken.user_token;
+                token.createdAt = req.body.userToken.token_issued;
+                token.expiresAt = req.body.userToken.token_expiration;
+                token.user = user;
+                return [4 /*yield*/, tokenRepository.save(token)];
+            case 5:
+                savedToken = _a.sent();
+                console.log("Token Saved: " + JSON.stringify(savedToken));
+                _a.label = 6;
+            case 6:
                 // This is what gets returned to the caller (Xumm Service)
                 // because we received their payload.
                 res.sendStatus(200);

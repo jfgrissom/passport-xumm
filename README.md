@@ -19,6 +19,10 @@ XUMM_PUB_KEY=<YOUR-XUMM-API-KEY-HERE>
 XUMM_PVT_KEY=<YOUR-XUMM-API-SECRET-HERE>
 ```
 
+## Auth Token
+
+You'll receive an auth token, token creation time, and token expiration time from the Xumm Service. There should not need to be a need to generate an auth token locally.
+
 ## End To End Authentication Workflow
 
 There is a diagram of the following sequence in the docs directory of this repo.

@@ -1,24 +1,23 @@
 import { Request, Response } from 'express'
 import axios from 'axios'
 import { XummTypes } from 'xumm-sdk'
-import { v4 as uuidV4 } from 'uuid'
+import { getConnection } from 'typeorm'
 
-import { User } from '../models/User'
+import { User } from '../entity/user'
+import { Token } from '../entity/token'
 
 // Once a request comes in check with Xumm to be sure the payload is real.
 export const xumm = async (req: Request, res: Response) => {
-  console.log(`Request From Xumm: ${req.body}`)
+  console.log(`Request From Xumm: ${JSON.stringify(req.body)}`)
+
+  const userRepository = await getConnection().getRepository(User)
+  const tokenRepository = await getConnection().getRepository(Token)
 
   // This userID should be something your application passed
   // to Xumm when you requested the QR code.
   const userId = req.body.custom_meta.identifier
-  const user: User = req.context.users.find((user: User) => {
-    if ((user.id = userId)) return user
-  })
-  const userIndex = req.context.users.findIndex((user: User) => {
-    if ((user.id = userId)) return user
-  })
 
+  // If there is no user ID ignore it and respond with a 200.
   if (userId) {
     const url = `https://xumm.app/api/v1/platform/payload/ci/${userId}`
     const options = {
@@ -39,20 +38,19 @@ export const xumm = async (req: Request, res: Response) => {
     ) {
       console.log('Payload received is authentic: ')
       console.log('Creating new session and attaching public wallet data.')
-      const sessionId = uuidV4()
-      let updatedUser: User = {
-        ...user,
-        session: {
-          id: sessionId
-        },
-        wallets: [
-          { provider: 'xumm', address: `${response.data.response.account}` }
-        ]
-      }
 
       // Add the updated user to the "database".
-      req.context.users[userIndex] = updatedUser
-      console.log(`Current DB State: ${JSON.stringify(req.context.users)}`)
+      const user = await userRepository.findOne({ id: userId })
+
+      // Create a token.
+      const token = new Token()
+      token.hashedToken = req.body.userToken.user_token
+      token.createdAt = req.body.userToken.token_issued
+      token.expiresAt = req.body.userToken.token_expiration
+      token.user = user
+      const savedToken = await tokenRepository.save(token)
+
+      console.log(`Token Saved: ${JSON.stringify(savedToken)}`)
     }
   }
 
