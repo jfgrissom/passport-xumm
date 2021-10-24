@@ -47,6 +47,8 @@ There is a diagram of the following sequence in the docs directory of this repo.
 1. Your backend creates a new unique SessionID record and persists it. [A new session is a best practice based on NIST recommendations](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63b.pdf). The templates provided in this repo reinforce this recommendation.
 1. Your UI receives this success (and new SessionID) through the poller (or websocket), closes the connection, and redirects your user to an auth success page.
 
+![E2E process](/docs/images/E2E-Sequence.drawio.png)
+
 ## Mandatory
 
 1. Your code must provide a UniqueID to the function `Strategy.fetchQrCode()` and that same UniqueID must be bound to the user data you pass to `Strategy.authenticate()`.
