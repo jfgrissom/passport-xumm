@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import axios from 'axios'
 import { XummTypes } from 'xumm-sdk'
-import { getConnection } from 'typeorm'
 
 import { User } from '../entity/user'
 import { Token } from '../entity/token'
@@ -10,8 +9,8 @@ import { Token } from '../entity/token'
 export const xumm = async (req: Request, res: Response) => {
   console.log(`Request From Xumm: ${JSON.stringify(req.body)}`)
 
-  const userRepository = await getConnection().getRepository(User)
-  const tokenRepository = await getConnection().getRepository(Token)
+  const userRepository = await req.context.db.getRepository(User)
+  const tokenRepository = await req.context.db.getRepository(Token)
 
   // This userID should be something your application passed
   // to Xumm when you requested the QR code.

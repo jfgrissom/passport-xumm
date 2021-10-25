@@ -2,12 +2,11 @@ import { Request, Response } from 'express'
 
 import { XummStrategy } from '../../../dist/lib/passport-xumm'
 import { User } from '../entity/user'
-import { getConnection } from 'typeorm'
 
 export const qr = async (req: Request, res: Response) => {
   const pubKey = process.env.XUMM_PUB_KEY
   const pvtKey = process.env.XUMM_PVT_KEY
-  const userRepository = await getConnection().getRepository(User)
+  const userRepository = await req.context.db.getRepository(User)
 
   // Setup a user
   // Add this anonymous user to the "database".
