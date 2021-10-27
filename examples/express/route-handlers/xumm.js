@@ -41,7 +41,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 exports.xumm = void 0;
 var axios_1 = __importDefault(require("axios"));
-var typeorm_1 = require("typeorm");
 var user_1 = require("../entity/user");
 var token_1 = require("../entity/token");
 // Once a request comes in check with Xumm to be sure the payload is real.
@@ -51,10 +50,10 @@ var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
         switch (_a.label) {
             case 0:
                 console.log("Request From Xumm: " + JSON.stringify(req.body));
-                return [4 /*yield*/, (0, typeorm_1.getConnection)().getRepository(user_1.User)];
+                return [4 /*yield*/, req.context.db.getRepository(user_1.User)];
             case 1:
                 userRepository = _a.sent();
-                return [4 /*yield*/, (0, typeorm_1.getConnection)().getRepository(token_1.Token)
+                return [4 /*yield*/, req.context.db.getRepository(token_1.Token)
                     // This userID should be something your application passed
                     // to Xumm when you requested the QR code.
                 ];

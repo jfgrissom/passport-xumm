@@ -59,18 +59,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var express_1 = __importDefault(require("express"));
+var express_request_context_1 = __importDefault(require("express-request-context"));
 var typeorm_1 = require("typeorm");
 require("reflect-metadata");
+var express_session_1 = __importDefault(require("express-session"));
 var dotenv = __importStar(require("dotenv"));
+// Pull in the environment variables and account for them before continuing.
 dotenv.config();
-var qr_1 = require("./route-handlers/qr");
-var xumm_1 = require("./route-handlers/xumm");
+if (!process.env.SESSION_SECRET)
+    throw Error('Is your session secret in .env?');
+var sessionSecret = process.env.SESSION_SECRET;
+// Functions that handle the routes.
+var route_handlers_1 = require("./route-handlers/");
+// Why the ORM? These entities are used by passport via express-session.
 var user_1 = require("./entity/user");
 var token_1 = require("./entity/token");
 var session_1 = require("./entity/session");
+var constants_1 = require("./constants");
 // Configure the service.
 var port = 3000;
-var api = (0, express_1["default"])();
+var service = (0, express_1["default"])();
+service.use((0, express_request_context_1["default"])());
+service.use(express_1["default"].json());
+// Setup Session support for Passport to leverage.
+var sessionConfig = {
+    secret: sessionSecret,
+    name: constants_1.COOKIE_NAME,
+    cookie: {
+        httpOnly: true // Only let the browser modify this, not JS.
+        // These options you'll likely want in production but they aren't available from express-session.
+        // secure: true // Only set cookies if the TLS is enabled on the connection.
+        // ephemeral: true, // Nukes the cookie when the browser closes.
+        // duration: 30 * 60 * 1000,
+        // activeDuration: 5 * 60 * 1000,
+    }
+};
+service.use((0, express_session_1["default"])(sessionConfig));
 var options = {
     type: 'sqlite',
     database: "./data/db.sqlite",
@@ -78,22 +102,45 @@ var options = {
     logging: true,
     synchronize: true
 };
-var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+var createDatabase = function () { return __awaiter(void 0, void 0, void 0, function () {
     var connection;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, (0, typeorm_1.createConnection)(options)
-                // Apply middleware to the service.
+                // Middleware that sets up our database.
             ];
             case 1:
                 connection = _a.sent();
-                // Apply middleware to the service.
-                api.use(express_1["default"].json());
-                // Local routes here.
-                api.get('/qr', qr_1.qr);
-                api.post('/xumm', xumm_1.xumm);
+                // Middleware that sets up our database.
+                return [2 /*return*/, function (req, res, next) {
+                        req.context.db = connection;
+                        next();
+                    }];
+        }
+    });
+}); };
+var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var database;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, createDatabase()];
+            case 1:
+                database = _a.sent();
+                if (!database)
+                    throw Error('Could not connect to the DB.');
+                // Add the database to our request context.
+                service.use(database);
+                // Local API endpoints.
+                service.get('/api/qr', route_handlers_1.qr);
+                service.post('/api/xumm', route_handlers_1.xumm);
+                // Local Web endpoints.
+                service.get('/', route_handlers_1.home);
+                service.get('/login', route_handlers_1.login);
+                service.get('/logout', route_handlers_1.logout);
+                service.get('/user', route_handlers_1.user);
+                // Local VIEW endpoints.
                 // Start the API as a web service.
-                api.listen(port, function () {
+                service.listen(port, function () {
                     console.log("Example express app listening at http://localhost:" + port);
                 });
                 return [2 /*return*/];

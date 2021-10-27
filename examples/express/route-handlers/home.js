@@ -36,50 +36,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.qr = void 0;
-var passport_xumm_1 = require("../../../dist/lib/passport-xumm");
-var user_1 = require("../entity/user");
-var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var pubKey, pvtKey, userRepository, user, savedUser, xummStrategyProps, fetchQRCodeProps, strategy, qrCodeData, responseData;
+exports.home = void 0;
+var menu_1 = require("./menu");
+var home = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                pubKey = process.env.XUMM_PUB_KEY;
-                pvtKey = process.env.XUMM_PVT_KEY;
-                return [4 /*yield*/, req.context.db.getRepository(user_1.User)
-                    // Setup a user
-                    // Add this anonymous user to the "database".
-                ];
-            case 1:
-                userRepository = _a.sent();
-                user = new user_1.User();
-                user.name = 'Anonymous';
-                return [4 /*yield*/, userRepository.save(user)];
-            case 2:
-                savedUser = _a.sent();
-                console.log("Created User: " + user.name + " " + savedUser.id);
-                xummStrategyProps = {
-                    pubKey: pubKey,
-                    pvtKey: pvtKey
-                };
-                fetchQRCodeProps = {
-                    web: 'http://localhost:3000/',
-                    identifier: "" + savedUser.id
-                };
-                strategy = new passport_xumm_1.XummStrategy(xummStrategyProps);
-                return [4 /*yield*/, strategy.fetchQrCode(fetchQRCodeProps)
-                    // Exposing the userID to make it easier to mock payloads returned
-                    // from Xumm. No need to do this in your app.
-                ];
-            case 3:
-                qrCodeData = _a.sent();
-                responseData = {
-                    user_id: savedUser.id,
-                    payload: qrCodeData
-                };
-                res.send(responseData);
-                return [2 /*return*/];
-        }
+        res.send("\n    <h1>Home Page</h1>\n    " + (0, menu_1.menu)() + "\n    <p>Home page content.</p>\n  ");
+        return [2 /*return*/];
     });
 }); };
-exports.qr = qr;
+exports.home = home;

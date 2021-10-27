@@ -21,7 +21,7 @@ export const qr = async (req: Request, res: Response) => {
   }
 
   const fetchQRCodeProps = {
-    web: 'http://localhost:3000',
+    web: 'http://localhost:3000/',
     identifier: `${savedUser.id}`
   }
 
