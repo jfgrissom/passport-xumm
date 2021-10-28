@@ -3,6 +3,7 @@ import expressContext from 'express-request-context'
 import { ConnectionOptions, createConnection } from 'typeorm'
 import 'reflect-metadata'
 import session, { SessionOptions } from 'express-session'
+import { TypeormStore } from 'connect-typeorm'
 import * as dotenv from 'dotenv'
 
 // Pull in the environment variables and account for them before continuing.
@@ -14,9 +15,9 @@ const sessionSecret = process.env.SESSION_SECRET
 import { qr, xumm, login, home, logout, user } from './route-handlers/'
 
 // Why the ORM? These entities are used by passport via express-session.
-import { User } from './entity/user'
-import { Token } from './entity/token'
-import { Session } from './entity/session'
+import { User } from './entities/user'
+import { Token } from './entities/token'
+import { Session } from './entities/session'
 import { COOKIE_NAME } from './constants'
 
 // Configure the service.
@@ -25,22 +26,8 @@ const service = express()
 service.use(expressContext())
 service.use(express.json())
 
-// Setup Session support for Passport to leverage.
-const sessionConfig: SessionOptions = {
-  secret: sessionSecret,
-  name: COOKIE_NAME,
-  cookie: {
-    httpOnly: true // Only let the browser modify this, not JS.
-    // These options you'll likely want in production but they aren't available from express-session.
-    // secure: true // Only set cookies if the TLS is enabled on the connection.
-    // ephemeral: true, // Nukes the cookie when the browser closes.
-    // duration: 30 * 60 * 1000,
-    // activeDuration: 5 * 60 * 1000,
-  }
-}
-
-service.use(session(sessionConfig))
-
+// Database options.
+/*
 const options: ConnectionOptions = {
   type: 'sqlite',
   database: `./data/db.sqlite`,
@@ -48,20 +35,44 @@ const options: ConnectionOptions = {
   logging: true,
   synchronize: true
 }
+*/
 
-const createDatabase = async () => {
-  const connection = await createConnection(options)
+// Bootstrap the service.
+const main = async () => {
+  // Connect to the DB.
+  const database = await createConnection()
+  if (!database) throw Error('Could not connect to the DB.')
 
-  // Middleware that sets up our database.
-  return (req: Request, res: Response, next: NextFunction) => {
-    req.context.db = connection
+  // Middleware that injects our database.
+  const orm = (req: Request, res: Response, next: NextFunction) => {
+    req.context.db = database
     next()
   }
-}
+  service.use(orm)
 
-const main = async () => {
-  const database = await createDatabase()
-  if (!database) throw Error('Could not connect to the DB.')
+  // Add Session persistence. Later passport will leverage this.
+  const sessionRepository = database.getRepository(Session)
+  const sessionConfig: SessionOptions = {
+    secret: sessionSecret,
+    name: COOKIE_NAME,
+    saveUninitialized: false,
+    store: new TypeormStore({
+      cleanupLimit: 2,
+      limitSubquery: false, // If using MariaDB.
+      ttl: 86400
+    }).connect(sessionRepository),
+    cookie: {
+      httpOnly: true // Only let the browser modify this, not JS.
+      // These options you'll likely want in production but they aren't available from express-session.
+      // secure: true // Only set cookies if the TLS is enabled on the connection.
+      // ephemeral: true, // Nukes the cookie when the browser closes.
+      // duration: 30 * 60 * 1000,
+      // activeDuration: 5 * 60 * 1000,
+    }
+  }
+
+  // Add the session repo to the session.
+  service.use(session(sessionConfig))
 
   // Add the database to our request context.
   service.use(database)

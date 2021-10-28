@@ -14,11 +14,23 @@ var typeorm_1 = require("typeorm");
 var user_1 = require("./user");
 var Session = /** @class */ (function () {
     function Session() {
+        this.expiredAt = Date.now();
+        this.id = '';
+        this.json = '';
     }
     __decorate([
-        (0, typeorm_1.PrimaryGeneratedColumn)(),
-        __metadata("design:type", Number)
+        (0, typeorm_1.Index)(),
+        (0, typeorm_1.Column)('bigint'),
+        __metadata("design:type", Object)
+    ], Session.prototype, "expiredAt");
+    __decorate([
+        (0, typeorm_1.PrimaryColumn)('varchar', { length: 255 }),
+        __metadata("design:type", Object)
     ], Session.prototype, "id");
+    __decorate([
+        (0, typeorm_1.Column)('text'),
+        __metadata("design:type", Object)
+    ], Session.prototype, "json");
     __decorate([
         (0, typeorm_1.Column)({ type: 'time', "default": function () { return 'CURRENT_TIMESTAMP'; } }),
         __metadata("design:type", String)

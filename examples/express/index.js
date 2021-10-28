@@ -63,6 +63,7 @@ var express_request_context_1 = __importDefault(require("express-request-context
 var typeorm_1 = require("typeorm");
 require("reflect-metadata");
 var express_session_1 = __importDefault(require("express-session"));
+var connect_typeorm_1 = require("connect-typeorm");
 var dotenv = __importStar(require("dotenv"));
 // Pull in the environment variables and account for them before continuing.
 dotenv.config();
@@ -71,63 +72,59 @@ if (!process.env.SESSION_SECRET)
 var sessionSecret = process.env.SESSION_SECRET;
 // Functions that handle the routes.
 var route_handlers_1 = require("./route-handlers/");
-// Why the ORM? These entities are used by passport via express-session.
-var user_1 = require("./entity/user");
-var token_1 = require("./entity/token");
-var session_1 = require("./entity/session");
+var session_1 = require("./entities/session");
 var constants_1 = require("./constants");
 // Configure the service.
 var port = 3000;
 var service = (0, express_1["default"])();
 service.use((0, express_request_context_1["default"])());
 service.use(express_1["default"].json());
-// Setup Session support for Passport to leverage.
-var sessionConfig = {
-    secret: sessionSecret,
-    name: constants_1.COOKIE_NAME,
-    cookie: {
-        httpOnly: true // Only let the browser modify this, not JS.
-        // These options you'll likely want in production but they aren't available from express-session.
-        // secure: true // Only set cookies if the TLS is enabled on the connection.
-        // ephemeral: true, // Nukes the cookie when the browser closes.
-        // duration: 30 * 60 * 1000,
-        // activeDuration: 5 * 60 * 1000,
-    }
-};
-service.use((0, express_session_1["default"])(sessionConfig));
-var options = {
-    type: 'sqlite',
-    database: "./data/db.sqlite",
-    entities: [user_1.User, token_1.Token, session_1.Session],
-    logging: true,
-    synchronize: true
-};
-var createDatabase = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var connection;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, (0, typeorm_1.createConnection)(options)
-                // Middleware that sets up our database.
-            ];
-            case 1:
-                connection = _a.sent();
-                // Middleware that sets up our database.
-                return [2 /*return*/, function (req, res, next) {
-                        req.context.db = connection;
-                        next();
-                    }];
-        }
-    });
-}); };
+// Database options.
+/*
+const options: ConnectionOptions = {
+  type: 'sqlite',
+  database: `./data/db.sqlite`,
+  entities: [User, Token, Session],
+  logging: true,
+  synchronize: true
+}
+*/
+// Bootstrap the service.
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var database;
+    var database, orm, sessionRepository, sessionConfig;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, createDatabase()];
+            case 0: return [4 /*yield*/, (0, typeorm_1.createConnection)()];
             case 1:
                 database = _a.sent();
                 if (!database)
                     throw Error('Could not connect to the DB.');
+                orm = function (req, res, next) {
+                    req.context.db = database;
+                    next();
+                };
+                service.use(orm);
+                sessionRepository = database.getRepository(session_1.Session);
+                sessionConfig = {
+                    secret: sessionSecret,
+                    name: constants_1.COOKIE_NAME,
+                    saveUninitialized: false,
+                    store: new connect_typeorm_1.TypeormStore({
+                        cleanupLimit: 2,
+                        limitSubquery: false,
+                        ttl: 86400
+                    }).connect(sessionRepository),
+                    cookie: {
+                        httpOnly: true // Only let the browser modify this, not JS.
+                        // These options you'll likely want in production but they aren't available from express-session.
+                        // secure: true // Only set cookies if the TLS is enabled on the connection.
+                        // ephemeral: true, // Nukes the cookie when the browser closes.
+                        // duration: 30 * 60 * 1000,
+                        // activeDuration: 5 * 60 * 1000,
+                    }
+                };
+                // Add the session repo to the session.
+                service.use((0, express_session_1["default"])(sessionConfig));
                 // Add the database to our request context.
                 service.use(database);
                 // Local API endpoints.

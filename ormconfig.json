@@ -1,0 +1,11 @@
+[
+  {
+    "description": "This ORM configuration is just for the examples not for the lib.",
+    "name": "default",
+    "type": "sqlite",
+    "database": "./data/db.sqlite",
+    "entities": ["examples/express/entities/*.js"],
+    "logging": true,
+    "synchronize": true
+  }
+]

@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.qr = void 0;
 var passport_xumm_1 = require("../../../dist/lib/passport-xumm");
-var user_1 = require("../entity/user");
+var user_1 = require("../entities/user");
 var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var pubKey, pvtKey, userRepository, user, savedUser, xummStrategyProps, fetchQRCodeProps, strategy, qrCodeData, responseData;
     return __generator(this, function (_a) {

@@ -2,8 +2,8 @@ import { Request, Response } from 'express'
 import axios from 'axios'
 import { XummTypes } from 'xumm-sdk'
 
-import { User } from '../entity/user'
-import { Token } from '../entity/token'
+import { User } from '../entities/user'
+import { Token } from '../entities/token'
 
 // Once a request comes in check with Xumm to be sure the payload is real.
 export const xumm = async (req: Request, res: Response) => {

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
 import { XummStrategy } from '../../../dist/lib/passport-xumm'
-import { User } from '../entity/user'
+import { User } from '../entities/user'
 
 export const qr = async (req: Request, res: Response) => {
   const pubKey = process.env.XUMM_PUB_KEY

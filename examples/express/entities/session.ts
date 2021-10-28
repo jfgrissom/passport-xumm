@@ -1,16 +1,25 @@
+import { ISession } from 'connect-typeorm'
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  Entity,
+  Index,
+  JoinColumn,
   ManyToOne,
-  JoinColumn
+  PrimaryColumn
 } from 'typeorm'
 import { User } from './user'
 
 @Entity('Session')
-export class Session {
-  @PrimaryGeneratedColumn()
-  id!: number
+export class Session implements ISession {
+  @Index()
+  @Column('bigint')
+  public expiredAt = Date.now()
+
+  @PrimaryColumn('varchar', { length: 255 })
+  public id = ''
+
+  @Column('text')
+  public json = ''
 
   @Column({ type: 'time', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string

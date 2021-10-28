@@ -41,8 +41,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 exports.xumm = void 0;
 var axios_1 = __importDefault(require("axios"));
-var user_1 = require("../entity/user");
-var token_1 = require("../entity/token");
+var user_1 = require("../entities/user");
+var token_1 = require("../entities/token");
 // Once a request comes in check with Xumm to be sure the payload is real.
 var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var userRepository, tokenRepository, userId, url, options, response, user, token, savedToken;
