@@ -1,4 +1,19 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,26 +26,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 exports.__esModule = true;
 exports.Session = void 0;
 var typeorm_1 = require("typeorm");
-var user_1 = require("./user");
-var Session = /** @class */ (function () {
+var Session = /** @class */ (function (_super) {
+    __extends(Session, _super);
     function Session() {
-        this.expiredAt = Date.now();
-        this.id = '';
-        this.json = '';
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     __decorate([
-        (0, typeorm_1.Index)(),
-        (0, typeorm_1.Column)('bigint'),
-        __metadata("design:type", Object)
-    ], Session.prototype, "expiredAt");
-    __decorate([
-        (0, typeorm_1.PrimaryColumn)('varchar', { length: 255 }),
-        __metadata("design:type", Object)
+        (0, typeorm_1.PrimaryColumn)(),
+        __metadata("design:type", String)
     ], Session.prototype, "id");
     __decorate([
-        (0, typeorm_1.Column)('text'),
-        __metadata("design:type", Object)
-    ], Session.prototype, "json");
+        (0, typeorm_1.Column)(),
+        __metadata("design:type", String)
+    ], Session.prototype, "data");
     __decorate([
         (0, typeorm_1.Column)({ type: 'time', "default": function () { return 'CURRENT_TIMESTAMP'; } }),
         __metadata("design:type", String)
@@ -40,17 +48,12 @@ var Session = /** @class */ (function () {
         __metadata("design:type", String)
     ], Session.prototype, "updatedAt");
     __decorate([
-        (0, typeorm_1.Column)({ type: 'time' }),
-        __metadata("design:type", String)
+        (0, typeorm_1.Column)(),
+        __metadata("design:type", Number)
     ], Session.prototype, "expiresAt");
-    __decorate([
-        (0, typeorm_1.ManyToOne)(function (type) { return user_1.User; }),
-        (0, typeorm_1.JoinColumn)({ name: 'id' }),
-        __metadata("design:type", user_1.User)
-    ], Session.prototype, "user");
     Session = __decorate([
         (0, typeorm_1.Entity)('Session')
     ], Session);
     return Session;
-}());
+}(typeorm_1.BaseEntity));
 exports.Session = Session;

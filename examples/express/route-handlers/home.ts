@@ -5,6 +5,7 @@ export const home = async (req: Request, res: Response) => {
   res.send(`
     <h1>Home Page</h1>
     ${menu()}
+    Session: ${req.sessionID}
     <p>Home page content.</p>
   `)
 }

@@ -6,6 +6,7 @@
     "database": "./data/db.sqlite",
     "entities": ["examples/express/entities/*.js"],
     "logging": true,
+    "dropSchema": true,
     "synchronize": true
   }
 ]

@@ -61,9 +61,10 @@ exports.__esModule = true;
 var express_1 = __importDefault(require("express"));
 var express_request_context_1 = __importDefault(require("express-request-context"));
 var typeorm_1 = require("typeorm");
+var uuid_1 = require("uuid");
 require("reflect-metadata");
 var express_session_1 = __importDefault(require("express-session"));
-var connect_typeorm_1 = require("connect-typeorm");
+var typeorm_store_1 = require("typeorm-store");
 var dotenv = __importStar(require("dotenv"));
 // Pull in the environment variables and account for them before continuing.
 dotenv.config();
@@ -106,18 +107,19 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 service.use(orm);
                 sessionRepository = database.getRepository(session_1.Session);
                 sessionConfig = {
+                    genid: function (req) {
+                        return (0, uuid_1.v4)(); // use UUIDs for session IDs
+                    },
                     secret: sessionSecret,
                     name: constants_1.COOKIE_NAME,
-                    saveUninitialized: false,
-                    store: new connect_typeorm_1.TypeormStore({
-                        cleanupLimit: 2,
-                        limitSubquery: false,
-                        ttl: 86400
-                    }).connect(sessionRepository),
+                    saveUninitialized: true,
+                    store: new typeorm_store_1.TypeormStore({ repository: sessionRepository }),
+                    resave: false,
                     cookie: {
-                        httpOnly: true // Only let the browser modify this, not JS.
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production' ? true : false,
+                        sameSite: 'strict' // Only send a cookie if the domain matches the browser url.
                         // These options you'll likely want in production but they aren't available from express-session.
-                        // secure: true // Only set cookies if the TLS is enabled on the connection.
                         // ephemeral: true, // Nukes the cookie when the browser closes.
                         // duration: 30 * 60 * 1000,
                         // activeDuration: 5 * 60 * 1000,
@@ -125,8 +127,6 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 };
                 // Add the session repo to the session.
                 service.use((0, express_session_1["default"])(sessionConfig));
-                // Add the database to our request context.
-                service.use(database);
                 // Local API endpoints.
                 service.get('/api/qr', route_handlers_1.qr);
                 service.post('/api/xumm', route_handlers_1.xumm);

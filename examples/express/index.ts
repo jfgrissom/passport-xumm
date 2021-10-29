@@ -1,9 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express'
 import expressContext from 'express-request-context'
-import { ConnectionOptions, createConnection } from 'typeorm'
+import { createConnection } from 'typeorm'
+import { v4 as uuidV4 } from 'uuid'
 import 'reflect-metadata'
 import session, { SessionOptions } from 'express-session'
-import { TypeormStore } from 'connect-typeorm'
+import { TypeormStore } from 'typeorm-store'
 import * as dotenv from 'dotenv'
 
 // Pull in the environment variables and account for them before continuing.
@@ -43,7 +44,7 @@ const main = async () => {
   const database = await createConnection()
   if (!database) throw Error('Could not connect to the DB.')
 
-  // Middleware that injects our database.
+  // Middleware that injects our database ORM.
   const orm = (req: Request, res: Response, next: NextFunction) => {
     req.context.db = database
     next()
@@ -53,18 +54,19 @@ const main = async () => {
   // Add Session persistence. Later passport will leverage this.
   const sessionRepository = database.getRepository(Session)
   const sessionConfig: SessionOptions = {
+    genid: function (req) {
+      return uuidV4() // use UUIDs for session IDs
+    },
     secret: sessionSecret,
     name: COOKIE_NAME,
-    saveUninitialized: false,
-    store: new TypeormStore({
-      cleanupLimit: 2,
-      limitSubquery: false, // If using MariaDB.
-      ttl: 86400
-    }).connect(sessionRepository),
+    saveUninitialized: true,
+    store: new TypeormStore({ repository: sessionRepository }),
+    resave: false,
     cookie: {
-      httpOnly: true // Only let the browser modify this, not JS.
+      httpOnly: true, // Only let the browser modify this, not JS.
+      secure: process.env.NODE_ENV === 'production' ? true : false, // In production only set cookies if the TLS is enabled on the connection.
+      sameSite: 'strict' // Only send a cookie if the domain matches the browser url.
       // These options you'll likely want in production but they aren't available from express-session.
-      // secure: true // Only set cookies if the TLS is enabled on the connection.
       // ephemeral: true, // Nukes the cookie when the browser closes.
       // duration: 30 * 60 * 1000,
       // activeDuration: 5 * 60 * 1000,
@@ -73,9 +75,6 @@ const main = async () => {
 
   // Add the session repo to the session.
   service.use(session(sessionConfig))
-
-  // Add the database to our request context.
-  service.use(database)
 
   // Local API endpoints.
   service.get('/api/qr', qr)

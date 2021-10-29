@@ -1,8 +1,8 @@
-import { ISession } from 'connect-typeorm'
+import { SessionEntity } from 'typeorm-store'
 import {
+  BaseEntity,
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryColumn
@@ -10,16 +10,12 @@ import {
 import { User } from './user'
 
 @Entity('Session')
-export class Session implements ISession {
-  @Index()
-  @Column('bigint')
-  public expiredAt = Date.now()
+export class Session extends BaseEntity implements SessionEntity {
+  @PrimaryColumn()
+  public id: string
 
-  @PrimaryColumn('varchar', { length: 255 })
-  public id = ''
-
-  @Column('text')
-  public json = ''
+  @Column()
+  public data: string
 
   @Column({ type: 'time', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string
@@ -27,10 +23,12 @@ export class Session implements ISession {
   @Column({ type: 'time', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: string
 
-  @Column({ type: 'time' })
-  expiresAt: string
+  @Column()
+  expiresAt: number
 
+  /*
   @ManyToOne((type) => User)
   @JoinColumn({ name: 'id' })
   user: User
+  */
 }

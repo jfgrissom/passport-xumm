@@ -40,7 +40,7 @@ exports.home = void 0;
 var menu_1 = require("./menu");
 var home = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        res.send("\n    <h1>Home Page</h1>\n    " + (0, menu_1.menu)() + "\n    <p>Home page content.</p>\n  ");
+        res.send("\n    <h1>Home Page</h1>\n    " + (0, menu_1.menu)() + "\n    Session: " + req.sessionID + "\n    <p>Home page content.</p>\n  ");
         return [2 /*return*/];
     });
 }); };
