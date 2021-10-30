@@ -17,6 +17,7 @@ export const xumm = async (req: Request, res: Response) => {
   const userId = req.body.custom_meta.identifier
 
   // If there is no user ID ignore it and respond with a 200.
+  // This is the verify step.
   if (userId) {
     const url = `https://xumm.app/api/v1/platform/payload/ci/${userId}`
     const options = {

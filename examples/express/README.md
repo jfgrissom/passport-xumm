@@ -9,11 +9,23 @@ The contents of this directory is just an example to get you started when using 
 3. Retrieve the payload send to your the webhook you have configured in the Xumm dashboard.
 4. You can use that payload again in Postman to test our your application.
 
-## Using ngrok.
+## Receiving POST Data From Xumm Locally
+
+To receive posts from Xumm you'll need to do something to capture the payload from the Xumm Service. You have a couple options.
+
+1. Use the tool that Xumm recommends `https://webhook.site/`. To do this you would take the payload you find there and submit it to your locally running API. For example you could use Postman.
+2. Use a tool that tunnels your local system out to an endpoint on the internet. In this case you would use a tool like ngrok.
 
 If you're developing locally you can setup ngrok to tunnel to your local machine (https://dashboard.ngrok.com/get-started/tutorials).
 
 Change your webhook endpoint in the Xumm dashboard to receive Xumm payloads directly from their web service.
+
+## Getting a QR Code
+
+In this example there are 2 ways get a QR code that your Xumm user can use to authenticate. See examples of these.
+
+1. From the /api/qr route by making a webservice call. See: examples/express/route-handlers/qr.ts for usage in this way.
+1. From directly from the strategy itself by instantiating the StrategyXumm and calling the `fetchQrCode()` function. See: examples/express/route-handlers/login.ts for usage in this way.
 
 ## Understanding Payloads
 
