@@ -99,7 +99,6 @@ export class XummStrategy extends PassportStrategy {
       }
     }
 
-    const response = await this.createPayload(request)
-    return response
+    return await this.createPayload(request)
   }
 }

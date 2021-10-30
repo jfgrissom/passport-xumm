@@ -17,11 +17,11 @@ export class Session extends BaseEntity implements SessionEntity {
   @Column()
   public data: string
 
-  @Column({ type: 'time', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: string
+  @Column({ default: () => new Date().getTime() })
+  createdAt: number
 
-  @Column({ type: 'time', default: () => 'CURRENT_TIMESTAMP' })
-  updatedAt: string
+  @Column({ default: () => new Date().getTime() })
+  updatedAt: number
 
   @Column()
   expiresAt: number

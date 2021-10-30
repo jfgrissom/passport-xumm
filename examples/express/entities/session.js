@@ -40,12 +40,12 @@ var Session = /** @class */ (function (_super) {
         __metadata("design:type", String)
     ], Session.prototype, "data");
     __decorate([
-        (0, typeorm_1.Column)({ type: 'time', "default": function () { return 'CURRENT_TIMESTAMP'; } }),
-        __metadata("design:type", String)
+        (0, typeorm_1.Column)({ "default": function () { return new Date().getTime(); } }),
+        __metadata("design:type", Number)
     ], Session.prototype, "createdAt");
     __decorate([
-        (0, typeorm_1.Column)({ type: 'time', "default": function () { return 'CURRENT_TIMESTAMP'; } }),
-        __metadata("design:type", String)
+        (0, typeorm_1.Column)({ "default": function () { return new Date().getTime(); } }),
+        __metadata("design:type", Number)
     ], Session.prototype, "updatedAt");
     __decorate([
         (0, typeorm_1.Column)(),
