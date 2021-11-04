@@ -35,62 +35,53 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
 exports.xumm = void 0;
-var axios_1 = __importDefault(require("axios"));
+var passport_xumm_1 = require("../../../dist/lib/passport-xumm");
 var user_1 = require("../entities/user");
-var token_1 = require("../entities/token");
 // Once a request comes in check with Xumm to be sure the payload is real.
 var xumm = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var userRepository, tokenRepository, userId, url, options, response, user, token, savedToken;
+    var pubKey, pvtKey, externalId, xummUserToken, xummStrategyProps, strategy, validated, userRepository, user;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
+                pubKey = process.env.XUMM_PUB_KEY;
+                pvtKey = process.env.XUMM_PVT_KEY;
                 console.log("Request From Xumm: " + JSON.stringify(req.body));
-                return [4 /*yield*/, req.context.db.getRepository(user_1.User)];
+                externalId = req.body.custom_meta.identifier;
+                xummUserToken = req.body.userToken.user_token;
+                // If there is no externalId then this isn't likely from Xumm.
+                // Silently return a 200 to the caller and exit this function.
+                if (!externalId) {
+                    res.sendStatus(200);
+                    return [2 /*return*/];
+                }
+                xummStrategyProps = {
+                    pubKey: pubKey,
+                    pvtKey: pvtKey
+                };
+                strategy = new passport_xumm_1.XummStrategy(xummStrategyProps);
+                return [4 /*yield*/, strategy.validateUserToken({ id: externalId })
+                    // If it's not valid silently return a 200 to the caller and exit.
+                ];
             case 1:
-                userRepository = _a.sent();
-                return [4 /*yield*/, req.context.db.getRepository(token_1.Token)
-                    // This userID should be something your application passed
-                    // to Xumm when you requested the QR code.
+                validated = _a.sent();
+                // If it's not valid silently return a 200 to the caller and exit.
+                if (!validated) {
+                    res.sendStatus(200);
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, req.context.db.getRepository(user_1.User)
+                    // At this point you have a session in the DB that has this external ID within it.
+                    // The next thing to do is bind the session to a user.
+                    // Construct the user.
                 ];
             case 2:
-                tokenRepository = _a.sent();
-                userId = req.body.custom_meta.identifier;
-                if (!userId) return [3 /*break*/, 6];
-                url = "https://xumm.app/api/v1/platform/payload/ci/" + userId;
-                options = {
-                    headers: {
-                        'X-API-Key': process.env.XUMM_PUB_KEY,
-                        'X-API-Secret': process.env.XUMM_PVT_KEY
-                    }
-                };
-                return [4 /*yield*/, axios_1["default"].get(url, options)];
-            case 3:
-                response = _a.sent();
-                if (!(response.data.meta.exists === true &&
-                    response.data.meta.resolved === true)) return [3 /*break*/, 6];
-                console.log('Payload received is authentic: ');
-                console.log('Creating new session and attaching public wallet data.');
-                return [4 /*yield*/, userRepository.findOne({ id: userId })
-                    // Create a token.
-                ];
-            case 4:
-                user = _a.sent();
-                token = new token_1.Token();
-                token.hashedToken = req.body.userToken.user_token;
-                token.createdAt = req.body.userToken.token_issued;
-                token.expiresAt = req.body.userToken.token_expiration;
-                token.user = user;
-                return [4 /*yield*/, tokenRepository.save(token)];
-            case 5:
-                savedToken = _a.sent();
-                console.log("Token Saved: " + JSON.stringify(savedToken));
-                _a.label = 6;
-            case 6:
+                userRepository = _a.sent();
+                user = new user_1.User();
+                user.id = validated.userToken;
+                // Go ahead and save the user. According to typeorm docs save is an "upsert".
+                userRepository.save(user);
                 // This is what gets returned to the caller (Xumm Service)
                 // because we received their payload.
                 res.sendStatus(200);

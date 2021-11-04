@@ -20,6 +20,8 @@ export const qr = async (req: Request, res: Response) => {
     pvtKey
   }
 
+  // TODO: This QR API endpoint needs to receive location data for the web url below.
+  // http://localhost:3000/login-success?externalId=${SomeExternalID}
   const fetchQRCodeProps = {
     web: 'http://localhost:3000/',
     identifier: `${savedUser.id}`

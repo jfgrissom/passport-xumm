@@ -2,6 +2,32 @@
 
 The contents of this directory is just an example to get you started when using this library. It's useful for development if you want to help to improve this also.
 
+## Calling Xumm Service API
+
+There are 3 cases we have for calling the Xumm API.
+
+1. To get a QR Code. This happens when a user chooses to login ("SignIn").
+2. To verify a POST payload send to our Xumm endpoint is valid. This happens after a user sings the "SignIn" request attached to the QR.
+3. When we are pushing a transaction signing request to the user. This happens after "SignIn" and sometime during the user's normal activity on the site. Buying something, trading something on the ledger, paying fee, or moving funds.
+
+Once we have a user_token (along with issue time and expiration time) from Xumm and an XRPL account from them the user is signed in until their token expires.
+
+## Authenticated
+
+What makes a user authenticated with Xumm?
+
+When a user on your site signs a transaction (proving they are the owner of a specific account) they are authenticated.
+
+Your app has to handle tieing together the account to a user and tieing a session to the user.
+
+Your user is authenticated when they:
+
+1. The user request a "SignIn" transaction from Xumm. (Your site needs to add an external identifier to the transaction to track the session making the authentication request.)
+2. The user signs the transaction either on your sight directly or on Xumm's site. (Handled by Xumm Mobile wallet and Xumm Service.)
+3. Xumm sends POST data back to your site using the external identifier you provided. (Your site needs to implement an endpoint that can receive this POST.)
+4. Your site verifies the POST data is valid. (Your site needs to create or update a user with the session user_token passed to the application.)
+5. Your site needs swaps the anonymous session out with a new one that is bound to the user that owns the wallet associated with the user_token passed from Xumm.
+
 ## Workflow
 
 1. Use a tool like Postman to make a request to `http://locahost:3000/qr`. This will return a response that contains QR code data from Xumm.

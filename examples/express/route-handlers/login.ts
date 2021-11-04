@@ -15,10 +15,15 @@ export const login = async (req: Request, res: Response) => {
     const props: iXummStrategyProps = { pubKey, pvtKey }
     const xumm = new XummStrategy(props)
 
-    // Get a QR code.
-    const identifier = uuidv4()
+    // Add an identifier to the cookie.
+    // This will be used when the request is signed and this data is
+    // returned to the application.
+    const identifier: string = uuidv4()
+    req.session.external = identifier
+
+    // Get a QR code and share this id with Xumm.
     const qr = await xumm.fetchQrCode({
-      web: 'http://localhost:3000/',
+      web: `http://localhost:3000/login-success?external_id=${identifier}`,
       identifier
     })
 
@@ -34,6 +39,8 @@ export const login = async (req: Request, res: Response) => {
         setup a poller or socket to react when Xumm sends a message after 
         the user has authenticated.
       </p>
+      Session: ${req.sessionID}<br/>
+      External: ${req.session.external}
     `)
     return
   }

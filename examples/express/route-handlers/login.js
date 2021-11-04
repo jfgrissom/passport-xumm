@@ -52,8 +52,9 @@ var login = function (req, res) { return __awaiter(void 0, void 0, void 0, funct
                 props = { pubKey: pubKey, pvtKey: pvtKey };
                 xumm = new passport_xumm_1.XummStrategy(props);
                 identifier = (0, uuid_1.v4)();
+                req.session.external = identifier;
                 return [4 /*yield*/, xumm.fetchQrCode({
-                        web: 'http://localhost:3000/',
+                        web: "http://localhost:3000/login-success?external_id=" + identifier,
                         identifier: identifier
                     })
                     // Present the QR to the user.
@@ -61,7 +62,7 @@ var login = function (req, res) { return __awaiter(void 0, void 0, void 0, funct
             case 1:
                 qr = _a.sent();
                 // Present the QR to the user.
-                res.send("\n      <h1>Login with Xumm!</h1>\n      " + (0, menu_1.menu)() + "\n      <p><a href=\"" + qr.next.always + "\">Click Here</a> to login with Xumm</p>\n      <p>OR Scan this with Xumm Wallet App</p>\n      <img src=" + qr.refs.qr_png + " />\n      <p>\n        Note: If you have the user scan directly here you'll need to \n        setup a poller or socket to react when Xumm sends a message after \n        the user has authenticated.\n      </p>\n    ");
+                res.send("\n      <h1>Login with Xumm!</h1>\n      " + (0, menu_1.menu)() + "\n      <p><a href=\"" + qr.next.always + "\">Click Here</a> to login with Xumm</p>\n      <p>OR Scan this with Xumm Wallet App</p>\n      <img src=" + qr.refs.qr_png + " />\n      <p>\n        Note: If you have the user scan directly here you'll need to \n        setup a poller or socket to react when Xumm sends a message after \n        the user has authenticated.\n      </p>\n      Session: " + req.sessionID + "<br/>\n      External: " + req.session.external + "\n    ");
                 return [2 /*return*/];
             case 2:
                 res.send("\n    <h1>Logged in already</h1>\n    " + (0, menu_1.menu)() + "\n    Session: " + req.sessionID + "\n    <p>Click Logout to end your session.!</p>\n  ");

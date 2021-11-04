@@ -10,7 +10,7 @@ export interface iXummStrategyProps {
   timeout?: number
 }
 
-export interface XummResponse {
+export interface iXummResponse {
   data: XummTypes.XummGetPayloadResponse
 }
 
@@ -26,6 +26,11 @@ export interface iAuthenticateProps {
   pubKey: string
 }
 
+export interface iValidated {
+  userToken: string
+  externalId: string
+}
+
 const BAD_REQUEST = 400
 
 export class XummStrategy extends PassportStrategy {
@@ -35,6 +40,7 @@ export class XummStrategy extends PassportStrategy {
 
     this.timeout = timeout || 240
     this.pubKey = pubKey
+    this.pvtKey = pvtKey
     this.name = 'Xumm Strategy For PassportJS'
     this.sdk = new XummSdk(pubKey, pvtKey)
 
@@ -45,9 +51,15 @@ export class XummStrategy extends PassportStrategy {
 
   public timeout: number
   public pubKey: string
+  private pvtKey: string
   public name: string
   private sdk: XummSdk
 
+  /*
+    A person who has signed a transaction has been authenticated.
+    This activity proves they've signed the transaction using the 
+    Xumm service as the authoritative source.
+  */
   authenticate = async (req: any, options: iAuthenticateProps) => {
     const { identifier, pubKey, pvtKey } = options
     const url = `https://xumm.app/api/v1/platform/payload/ci/${identifier}`
@@ -58,7 +70,7 @@ export class XummStrategy extends PassportStrategy {
       }
     }
 
-    const response: XummResponse = await axios.get(url, axiosConfig)
+    const response: iXummResponse = await axios.get(url, axiosConfig)
     if (
       response.data.meta.exists === true &&
       response.data.meta.resolved === true
@@ -74,6 +86,37 @@ export class XummStrategy extends PassportStrategy {
         BAD_REQUEST
       )
     }
+  }
+
+  /*
+    Takes the externalId received from a POST that Xumm sends to you and verifies
+    it came from them.
+   */
+  validateUserToken = async (props: {
+    id: string
+  }): Promise<iValidated | null> => {
+    const { id } = props
+    const url = `https://xumm.app/api/v1/platform/payload/ci/${id}`
+    const options = {
+      headers: {
+        'X-API-Key': this.pubKey,
+        'X-API-Secret': this.pvtKey
+      }
+    }
+
+    const response: iXummResponse = await axios.get(url, options)
+    if (
+      response.data.meta.exists === true &&
+      response.data.meta.resolved === true &&
+      response.data.response.account &&
+      response.data.application.issued_user_token
+    ) {
+      return {
+        userToken: response.data.application.issued_user_token,
+        externalId: id
+      }
+    }
+    return null
   }
 
   createPayload = async (request: XummTypes.XummPostPayloadBodyJson) => {

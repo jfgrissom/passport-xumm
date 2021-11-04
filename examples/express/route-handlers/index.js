@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.user = exports.logout = exports.home = exports.login = exports.xumm = exports.qr = void 0;
+exports.success = exports.user = exports.logout = exports.home = exports.login = exports.xumm = exports.qr = void 0;
 var qr_1 = require("./qr");
 exports.qr = qr_1.qr;
 var xumm_1 = require("./xumm");
@@ -13,3 +13,5 @@ var logout_1 = require("./logout");
 exports.logout = logout_1.logout;
 var user_1 = require("./user");
 exports.user = user_1.user;
+var login_success_1 = require("./login-success");
+exports.success = login_success_1.success;

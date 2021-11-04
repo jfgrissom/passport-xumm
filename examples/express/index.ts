@@ -11,9 +11,15 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 if (!process.env.SESSION_SECRET) throw Error('Is your session secret in .env?')
 const sessionSecret = process.env.SESSION_SECRET
+// Add additional keys to our session.
+declare module 'express-session' {
+  interface SessionData {
+    external?: string
+  }
+}
 
 // Functions that handle the routes.
-import { qr, xumm, login, home, logout, user } from './route-handlers/'
+import { qr, xumm, login, home, logout, user, success } from './route-handlers/'
 
 // Why the ORM? These entities are used by passport via express-session.
 import { User } from './entities/user'
@@ -83,6 +89,7 @@ const main = async () => {
   // Local Web endpoints.
   service.get('/', home)
   service.get('/login', login)
+  service.get('/login-success', success)
   service.get('/logout', logout)
   service.get('/user', user)
 

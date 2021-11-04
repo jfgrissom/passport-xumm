@@ -133,6 +133,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // Local Web endpoints.
                 service.get('/', route_handlers_1.home);
                 service.get('/login', route_handlers_1.login);
+                service.get('/login-success', route_handlers_1.success);
                 service.get('/logout', route_handlers_1.logout);
                 service.get('/user', route_handlers_1.user);
                 // Local VIEW endpoints.
