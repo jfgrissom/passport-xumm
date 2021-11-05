@@ -38,10 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.login = void 0;
 var menu_1 = require("./menu");
-var passport_xumm_1 = require("../../../lib/passport-xumm");
-var uuid_1 = require("uuid");
+var qr_1 = require("../shared/qr");
+var identifier_1 = require("../shared/identifier");
 var login = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var authenticated, pubKey, pvtKey, props, xumm, identifier, qr;
+    var authenticated, pubKey, pvtKey, identifier, fetchQrDataProps, qr;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -49,14 +49,14 @@ var login = function (req, res) { return __awaiter(void 0, void 0, void 0, funct
                 if (!!authenticated) return [3 /*break*/, 2];
                 pubKey = process.env.XUMM_PUB_KEY;
                 pvtKey = process.env.XUMM_PVT_KEY;
-                props = { pubKey: pubKey, pvtKey: pvtKey };
-                xumm = new passport_xumm_1.XummStrategy(props);
-                identifier = (0, uuid_1.v4)();
+                identifier = (0, identifier_1.generateIdentifier)();
                 req.session.external = identifier;
-                return [4 /*yield*/, xumm.fetchQrCode({
-                        web: "http://localhost:3000/login-success?external_id=" + identifier,
-                        identifier: identifier
-                    })
+                fetchQrDataProps = {
+                    pubKey: pubKey,
+                    pvtKey: pvtKey,
+                    identifier: identifier
+                };
+                return [4 /*yield*/, (0, qr_1.fetchQrData)(fetchQrDataProps)
                     // Present the QR to the user.
                 ];
             case 1:

@@ -47,7 +47,7 @@
     "prebuild": "npm run clean",
     "build": "tsc",
     "predev": "npm run build",
-    "dev": "tsc -w examples/express/*.ts examples/express/entities/*.ts --esModuleInterop --resolveJsonModule --experimentalDecorators --emitDecoratorMetadata &",
+    "dev": "tsc examples/express/*.ts --watch --esModuleInterop --resolveJsonModule --experimentalDecorators --emitDecoratorMetadata &",
     "postdev": "nodemon examples/express/index.js"
   },
   "repository": {

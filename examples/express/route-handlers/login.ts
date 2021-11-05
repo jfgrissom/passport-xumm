@@ -1,31 +1,32 @@
 import { Request, Response } from 'express'
 import { menu } from './menu'
-import { XummStrategy } from '../../../lib/passport-xumm'
-import { v4 as uuidv4 } from 'uuid'
-import { iXummStrategyProps } from '../../../dist/lib/passport-xumm'
+
+import { fetchQrData, iFetchQrDataProps } from '../shared/qr'
+import { generateIdentifier } from '../shared/identifier'
 
 export const login = async (req: Request, res: Response) => {
   // Logged in ? redirect : showQr
   const authenticated = false
 
   if (!authenticated) {
-    // Initialize Xumm.
+    // Get environment variables to initialize Xumm.
     const pubKey = process.env.XUMM_PUB_KEY
     const pvtKey = process.env.XUMM_PVT_KEY
-    const props: iXummStrategyProps = { pubKey, pvtKey }
-    const xumm = new XummStrategy(props)
 
     // Add an identifier to the cookie.
     // This will be used when the request is signed and this data is
     // returned to the application.
-    const identifier: string = uuidv4()
+    const identifier: string = generateIdentifier()
     req.session.external = identifier
 
-    // Get a QR code and share this id with Xumm.
-    const qr = await xumm.fetchQrCode({
-      web: `http://localhost:3000/login-success?external_id=${identifier}`,
+    const fetchQrDataProps: iFetchQrDataProps = {
+      pubKey,
+      pvtKey,
       identifier
-    })
+    }
+
+    // Get a QR code and share this id with Xumm.
+    const qr = await fetchQrData(fetchQrDataProps)
 
     // Present the QR to the user.
     res.send(`

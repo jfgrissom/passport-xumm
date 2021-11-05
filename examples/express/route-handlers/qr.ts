@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 
-import { XummStrategy } from '../../../dist/lib/passport-xumm'
 import { User } from '../entities/user'
+import { generateIdentifier } from '../shared/identifier'
+import { fetchQrData, iFetchQrDataProps } from '../shared/qr'
 
 export const qr = async (req: Request, res: Response) => {
   const pubKey = process.env.XUMM_PUB_KEY
@@ -15,20 +16,20 @@ export const qr = async (req: Request, res: Response) => {
   const savedUser = await userRepository.save(user)
   console.log(`Created User: ${user.name} ${savedUser.id}`)
 
-  const xummStrategyProps = {
+  // Add an identifier to the cookie.
+  // This will be used when the request is signed and this data is
+  // returned to the application.
+  const identifier: string = generateIdentifier()
+  req.session.external = identifier
+
+  const fetchQrDataProps: iFetchQrDataProps = {
     pubKey,
-    pvtKey
+    pvtKey,
+    identifier
   }
 
-  // TODO: This QR API endpoint needs to receive location data for the web url below.
-  // http://localhost:3000/login-success?externalId=${SomeExternalID}
-  const fetchQRCodeProps = {
-    web: 'http://localhost:3000/',
-    identifier: `${savedUser.id}`
-  }
-
-  const strategy = new XummStrategy(xummStrategyProps)
-  const qrCodeData = await strategy.fetchQrCode(fetchQRCodeProps)
+  // Get a QR code and share this id with Xumm.
+  const qrCodeData = await fetchQrData(fetchQrDataProps)
 
   // Exposing the userID to make it easier to mock payloads returned
   // from Xumm. No need to do this in your app.

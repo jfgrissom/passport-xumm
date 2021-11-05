@@ -37,10 +37,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.qr = void 0;
-var passport_xumm_1 = require("../../../dist/lib/passport-xumm");
 var user_1 = require("../entities/user");
+var identifier_1 = require("../shared/identifier");
+var qr_1 = require("../shared/qr");
 var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var pubKey, pvtKey, userRepository, user, savedUser, xummStrategyProps, fetchQRCodeProps, strategy, qrCodeData, responseData;
+    var pubKey, pvtKey, userRepository, user, savedUser, identifier, fetchQrDataProps, qrCodeData, responseData;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -58,16 +59,14 @@ var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function
             case 2:
                 savedUser = _a.sent();
                 console.log("Created User: " + user.name + " " + savedUser.id);
-                xummStrategyProps = {
+                identifier = (0, identifier_1.generateIdentifier)();
+                req.session.external = identifier;
+                fetchQrDataProps = {
                     pubKey: pubKey,
-                    pvtKey: pvtKey
+                    pvtKey: pvtKey,
+                    identifier: identifier
                 };
-                fetchQRCodeProps = {
-                    web: 'http://localhost:3000/',
-                    identifier: "" + savedUser.id
-                };
-                strategy = new passport_xumm_1.XummStrategy(xummStrategyProps);
-                return [4 /*yield*/, strategy.fetchQrCode(fetchQRCodeProps)
+                return [4 /*yield*/, (0, qr_1.fetchQrData)(fetchQrDataProps)
                     // Exposing the userID to make it easier to mock payloads returned
                     // from Xumm. No need to do this in your app.
                 ];

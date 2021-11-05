@@ -66,6 +66,7 @@ require("reflect-metadata");
 var express_session_1 = __importDefault(require("express-session"));
 var typeorm_store_1 = require("typeorm-store");
 var dotenv = __importStar(require("dotenv"));
+var orm_1 = require("./middleware/orm");
 // Pull in the environment variables and account for them before continuing.
 dotenv.config();
 if (!process.env.SESSION_SECRET)
@@ -73,23 +74,16 @@ if (!process.env.SESSION_SECRET)
 var sessionSecret = process.env.SESSION_SECRET;
 // Functions that handle the routes.
 var route_handlers_1 = require("./route-handlers/");
+// Why the ORM? These entities are used by passport via express-session.
 var session_1 = require("./entities/session");
 var constants_1 = require("./constants");
 // Configure the service.
 var port = 3000;
 var service = (0, express_1["default"])();
+// Add context to the service so we can add a database to the context.
 service.use((0, express_request_context_1["default"])());
+// Enable the reading of requests as JSON data.
 service.use(express_1["default"].json());
-// Database options.
-/*
-const options: ConnectionOptions = {
-  type: 'sqlite',
-  database: `./data/db.sqlite`,
-  entities: [User, Token, Session],
-  logging: true,
-  synchronize: true
-}
-*/
 // Bootstrap the service.
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var database, orm, sessionRepository, sessionConfig;
@@ -100,10 +94,8 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 database = _a.sent();
                 if (!database)
                     throw Error('Could not connect to the DB.');
-                orm = function (req, res, next) {
-                    req.context.db = database;
-                    next();
-                };
+                orm = (0, orm_1.typeOrm)({ database: database });
+                // Apply the ORM middleware to the service.
                 service.use(orm);
                 sessionRepository = database.getRepository(session_1.Session);
                 sessionConfig = {
@@ -113,19 +105,16 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                     secret: sessionSecret,
                     name: constants_1.COOKIE_NAME,
                     saveUninitialized: true,
+                    // Add Session persistence. Later passport will leverage this.
                     store: new typeorm_store_1.TypeormStore({ repository: sessionRepository }),
                     resave: false,
                     cookie: {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production' ? true : false,
                         sameSite: 'strict' // Only send a cookie if the domain matches the browser url.
-                        // These options you'll likely want in production but they aren't available from express-session.
-                        // ephemeral: true, // Nukes the cookie when the browser closes.
-                        // duration: 30 * 60 * 1000,
-                        // activeDuration: 5 * 60 * 1000,
                     }
                 };
-                // Add the session repo to the session.
+                // Apply the Session middleware to the service.
                 service.use((0, express_session_1["default"])(sessionConfig));
                 // Local API endpoints.
                 service.get('/api/qr', route_handlers_1.qr);
@@ -136,7 +125,6 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 service.get('/login-success', route_handlers_1.success);
                 service.get('/logout', route_handlers_1.logout);
                 service.get('/user', route_handlers_1.user);
-                // Local VIEW endpoints.
                 // Start the API as a web service.
                 service.listen(port, function () {
                     console.log("Example express app listening at http://localhost:" + port);
