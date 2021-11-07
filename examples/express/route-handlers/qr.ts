@@ -21,7 +21,7 @@ export const qr = async (req: Request, res: Response) => {
   // This will be used when the request is signed and this data is
   // returned to the application.
   const identifier: string = generateIdentifier()
-  req.session.external = identifier
+  req.session.externalId = identifier
 
   const fetchQrDataProps: iFetchQrDataProps = {
     pubKey,

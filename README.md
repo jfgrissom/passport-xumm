@@ -27,6 +27,11 @@ There is a directory in the repository called examples. Currently it has an exam
 
 Using it will require you to use a tool like Postman and the Xumm Dashboard to interact.
 
+### Authentication Scenarios
+
+1. You have a monolith (I'm not judging I use BlitzJS) that renders html and delivers it to the client.
+1. You have an SPA (FrontEnd) and a separate API (Backend).
+
 ## Auth Token
 
 You'll receive an auth token, token creation time, and token expiration time from the Xumm Service. There should not need to be a need to generate an auth token locally.

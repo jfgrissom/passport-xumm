@@ -53,6 +53,12 @@ In this example there are 2 ways get a QR code that your Xumm user can use to au
 1. From the /api/qr route by making a webservice call. See: examples/express/route-handlers/qr.ts for usage in this way.
 1. From directly from the strategy itself by instantiating the StrategyXumm and calling the `fetchQrCode()` function. See: examples/express/route-handlers/login.ts for usage in this way.
 
+## Using the websocket Xumm Provides
+
+When you receive a QR code you also receive websocket data to monitor the results of the "SignIn" signing request.
+
+You can use this on the client to receive the payload from Xumm and then submit it to your non-API login handler. Doing this keeps the users browser in the middle of the conversation between your backend and the Xumm Service.
+
 ## Understanding Payloads
 
 Example request body received from Xumm Service once a QR code is signed. This request comes in from Xumm Service. You define it in the Xumm App Dashboard. The property it's called the "Webhook URL for callbacks".
