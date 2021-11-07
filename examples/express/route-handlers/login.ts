@@ -18,6 +18,7 @@ export const login = async (req: Request, res: Response) => {
     // returned to the application.
     const identifier: string = generateIdentifier()
     req.session.external = identifier
+    req.context.external = identifier
 
     const fetchQrDataProps: iFetchQrDataProps = {
       pubKey,
@@ -45,6 +46,8 @@ export const login = async (req: Request, res: Response) => {
     `)
     return
   }
+
+  // Send a response to the client.
   res.send(`
     <h1>Logged in already</h1>
     ${menu()}

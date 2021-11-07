@@ -51,6 +51,7 @@ var login = function (req, res) { return __awaiter(void 0, void 0, void 0, funct
                 pvtKey = process.env.XUMM_PVT_KEY;
                 identifier = (0, identifier_1.generateIdentifier)();
                 req.session.external = identifier;
+                req.context.external = identifier;
                 fetchQrDataProps = {
                     pubKey: pubKey,
                     pvtKey: pvtKey,
@@ -65,6 +66,7 @@ var login = function (req, res) { return __awaiter(void 0, void 0, void 0, funct
                 res.send("\n      <h1>Login with Xumm!</h1>\n      " + (0, menu_1.menu)() + "\n      <p><a href=\"" + qr.next.always + "\">Click Here</a> to login with Xumm</p>\n      <p>OR Scan this with Xumm Wallet App</p>\n      <img src=" + qr.refs.qr_png + " />\n      <p>\n        Note: If you have the user scan directly here you'll need to \n        setup a poller or socket to react when Xumm sends a message after \n        the user has authenticated.\n      </p>\n      Session: " + req.sessionID + "<br/>\n      External: " + req.session.external + "\n    ");
                 return [2 /*return*/];
             case 2:
+                // Send a response to the client.
                 res.send("\n    <h1>Logged in already</h1>\n    " + (0, menu_1.menu)() + "\n    Session: " + req.sessionID + "\n    <p>Click Logout to end your session.!</p>\n  ");
                 return [2 /*return*/];
         }

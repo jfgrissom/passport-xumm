@@ -13,6 +13,7 @@ export const qr = async (req: Request, res: Response) => {
   // Add this anonymous user to the "database".
   const user = new User()
   user.name = 'Anonymous'
+  user.id = generateIdentifier()
   const savedUser = await userRepository.save(user)
   console.log(`Created User: ${user.name} ${savedUser.id}`)
 
@@ -38,5 +39,6 @@ export const qr = async (req: Request, res: Response) => {
     payload: qrCodeData
   }
 
+  // Send the userID and the QrCode Data.
   res.send(responseData)
 }

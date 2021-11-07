@@ -7,6 +7,8 @@ import session, { SessionOptions } from 'express-session'
 import { TypeormStore } from 'typeorm-store'
 import * as dotenv from 'dotenv'
 import { typeOrm } from './middleware/orm'
+import passport from 'passport'
+import { XummStrategy, iXummStrategyProps } from '../../dist/lib/passport-xumm'
 
 // Pull in the environment variables and account for them before continuing.
 dotenv.config()
@@ -15,14 +17,16 @@ const sessionSecret = process.env.SESSION_SECRET
 // Add additional keys to our session.
 declare module 'express-session' {
   interface SessionData {
-    external?: string
+    externalId?: string
+    userToken?: string
+    tokenExpiration?: number
   }
 }
 
-// Functions that handle the routes.
+// Pull in functions to handle the routes.
 import { qr, xumm, login, home, logout, user, success } from './route-handlers/'
 
-// Why the ORM? These entities are used by passport via express-session.
+// Why the session from the ORM? This entity is used by passport via express-session.
 import { Session } from './entities/session'
 import { COOKIE_NAME } from './constants'
 
@@ -48,7 +52,7 @@ const main = async () => {
   // Apply the ORM middleware to the service.
   service.use(orm)
 
-  // Initialize Session middleware before handing it to the servie.
+  // Initialize Session middleware before handing it to the service.
   const sessionRepository = database.getRepository(Session)
   const sessionConfig: SessionOptions = {
     genid: function (req) {
@@ -67,18 +71,34 @@ const main = async () => {
     }
   }
 
-  // Apply the Session middleware to the service.
-  service.use(session(sessionConfig))
-
-  // Local API endpoints.
+  // Local API endpoints
+  // These are put before we add sessions to the service because these should not support sessions.
+  // They expect authentication headers with every request.
   service.get('/api/qr', qr)
   service.post('/api/xumm', xumm)
 
-  // Local Web endpoints.
+  // Apply the Session middleware to the service.
+  service.use(session(sessionConfig))
+
+  // Create passport for authenticating XummStrategy.
+  const pubKey = process.env.XUMM_PUB_KEY
+  const pvtKey = process.env.XUMM_PVT_KEY
+
+  // This function is required by passport. It verifies that authentication
+  // data coming in through any http request matches up with data you have in your database.
+  const verify = () => {}
+  const strategyProps: iXummStrategyProps = { pubKey, pvtKey, verify }
+  passport.use('xumm', new XummStrategy(strategyProps))
+
+  // Public Web endpoints.
   service.get('/', home)
-  service.get('/login', login)
-  service.get('/login-success', success)
-  service.get('/logout', logout)
+  service.get('/login', login) // Prompts the user to login with Xumm.
+  service.get('/login-success', success) // User is redirected here from Xumm Service (or after a frontend websocket receives a completed message from Xumm Service).
+  service.get('/logout', logout) // Kills the session at the server and removes session data from browser cookies.
+
+  // service.post('login', login) // passport.authenticate middleware normally goes here.
+
+  // Private Web endpoints.
   service.get('/user', user)
 
   // Start the API as a web service.

@@ -67,14 +67,16 @@ var express_session_1 = __importDefault(require("express-session"));
 var typeorm_store_1 = require("typeorm-store");
 var dotenv = __importStar(require("dotenv"));
 var orm_1 = require("./middleware/orm");
+var passport_1 = __importDefault(require("passport"));
+var passport_xumm_1 = require("../../dist/lib/passport-xumm");
 // Pull in the environment variables and account for them before continuing.
 dotenv.config();
 if (!process.env.SESSION_SECRET)
     throw Error('Is your session secret in .env?');
 var sessionSecret = process.env.SESSION_SECRET;
-// Functions that handle the routes.
+// Pull in functions to handle the routes.
 var route_handlers_1 = require("./route-handlers/");
-// Why the ORM? These entities are used by passport via express-session.
+// Why the session from the ORM? This entity is used by passport via express-session.
 var session_1 = require("./entities/session");
 var constants_1 = require("./constants");
 // Configure the service.
@@ -86,7 +88,7 @@ service.use((0, express_request_context_1["default"])());
 service.use(express_1["default"].json());
 // Bootstrap the service.
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var database, orm, sessionRepository, sessionConfig;
+    var database, orm, sessionRepository, sessionConfig, pubKey, pvtKey, verify, strategyProps;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, (0, typeorm_1.createConnection)()];
@@ -114,16 +116,25 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                         sameSite: 'strict' // Only send a cookie if the domain matches the browser url.
                     }
                 };
-                // Apply the Session middleware to the service.
-                service.use((0, express_session_1["default"])(sessionConfig));
-                // Local API endpoints.
+                // Local API endpoints
+                // These are put before we add sessions to the service because these should not support sessions.
+                // They expect authentication headers with every request.
                 service.get('/api/qr', route_handlers_1.qr);
                 service.post('/api/xumm', route_handlers_1.xumm);
-                // Local Web endpoints.
+                // Apply the Session middleware to the service.
+                service.use((0, express_session_1["default"])(sessionConfig));
+                pubKey = process.env.XUMM_PUB_KEY;
+                pvtKey = process.env.XUMM_PVT_KEY;
+                verify = function () { };
+                strategyProps = { pubKey: pubKey, pvtKey: pvtKey, verify: verify };
+                passport_1["default"].use('xumm', new passport_xumm_1.XummStrategy(strategyProps));
+                // Public Web endpoints.
                 service.get('/', route_handlers_1.home);
-                service.get('/login', route_handlers_1.login);
-                service.get('/login-success', route_handlers_1.success);
-                service.get('/logout', route_handlers_1.logout);
+                service.get('/login', route_handlers_1.login); // Prompts the user to login with Xumm.
+                service.get('/login-success', route_handlers_1.success); // User is redirected here from Xumm Service (or after a frontend websocket receives a completed message from Xumm Service).
+                service.get('/logout', route_handlers_1.logout); // Kills the session at the server and removes session data from browser cookies.
+                // service.post('login', login) // passport.authenticate middleware normally goes here.
+                // Private Web endpoints.
                 service.get('/user', route_handlers_1.user);
                 // Start the API as a web service.
                 service.listen(port, function () {

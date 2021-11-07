@@ -55,6 +55,7 @@ var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function
                 userRepository = _a.sent();
                 user = new user_1.User();
                 user.name = 'Anonymous';
+                user.id = (0, identifier_1.generateIdentifier)();
                 return [4 /*yield*/, userRepository.save(user)];
             case 2:
                 savedUser = _a.sent();
@@ -76,6 +77,7 @@ var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function
                     user_id: savedUser.id,
                     payload: qrCodeData
                 };
+                // Send the userID and the QrCode Data.
                 res.send(responseData);
                 return [2 /*return*/];
         }
