@@ -124,37 +124,6 @@ export class XummStrategy extends PassportStrategy {
     }
   }
 
-  /*
-    Takes the externalId received from a POST that Xumm sends to you and verifies
-    it came from them.
-   */
-  validateUserToken = async (props: {
-    id: string
-  }): Promise<iValidated | null> => {
-    const { id } = props
-    const url = `https://xumm.app/api/v1/platform/payload/ci/${id}`
-    const options = {
-      headers: {
-        'X-API-Key': this.pubKey,
-        'X-API-Secret': this.pvtKey
-      }
-    }
-
-    const response: iXummResponse = await axios.get(url, options)
-    if (
-      response.data.meta.exists === true &&
-      response.data.meta.resolved === true &&
-      response.data.response.account &&
-      response.data.application.issued_user_token
-    ) {
-      return {
-        userToken: response.data.application.issued_user_token,
-        externalId: id
-      }
-    }
-    return null
-  }
-
   createPayload = async (request: XummTypes.XummPostPayloadBodyJson) => {
     return await this.sdk.payload.create(request)
   }
