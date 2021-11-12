@@ -59,15 +59,16 @@ export class XummStrategy extends PassportStrategy {
 
     this.timeout = timeout || 240 // Uses 240 as default which is the same as Xumm lib.
     this.pubKey = pubKey
-    this.pvtKey = pvtKey // To secure this value it has been made private to this class.
+    this._pvtKey = pvtKey // To secure this value it has been made private to this class.
     this.authUrl = 'https://xumm.app/api/v1/platform/payload/ci'
 
     this.name = 'xumm'
-    this.sdk = new XummSdk(pubKey, pvtKey)
+    this._sdk = new XummSdk(pubKey, pvtKey)
+    this.verify = verify
 
     if (!pubKey) throw Error('Xumm public API key is required.')
     if (!pvtKey) throw Error('Xumm private API secret is required.')
-    if (!this.sdk) throw Error('There was a problem initializing Xumm.')
+    if (!this._sdk) throw Error('There was a problem initializing Xumm.')
     if (!verify) throw Error('XummStrategy needs a verify function.')
   }
 
@@ -76,10 +77,11 @@ export class XummStrategy extends PassportStrategy {
   public timeout: number
   public pubKey: string
   public authUrl: string // Expose this so it's easy to change and unit test with.
+  public verify: Function
 
   // Explicitly define private props
-  private pvtKey: string // Restricting this value to this class only.
-  private sdk: XummSdk // Don't expose the SDK to any consumer of this lib.
+  private _pvtKey: string // Restricting this value to this class only.
+  private _sdk: XummSdk // Don't expose the SDK to any consumer of this lib.
 
   /*
     A person who has signed the "SignIn" transaction has been authenticated.
@@ -114,16 +116,18 @@ export class XummStrategy extends PassportStrategy {
     const identifier: string = req.query.externalId || req.session.externalId
     console.log(`Identifier: ${identifier}`)
     if (!identifier) {
-      fail({
-        message: 'Missing external identifier.',
+      this.fail(
+        {
+          message: 'Missing external identifier.'
+        },
         BAD_REQUEST
-      })
+      )
     }
     const url = `${this.authUrl}/${identifier}`
     const axiosConfig: AxiosRequestConfig = {
       headers: {
         'X-API-Key': this.pubKey,
-        'X-API-Secret': this.pvtKey
+        'X-API-Secret': this._pvtKey
       }
     }
 
@@ -154,7 +158,7 @@ export class XummStrategy extends PassportStrategy {
   }
 
   createPayload = async (request: XummTypes.XummPostPayloadBodyJson) => {
-    return await this.sdk.payload.create(request)
+    return await this._sdk.payload.create(request)
   }
 
   // Returns a payload that contains the data associated with a QR code.
