@@ -6,7 +6,7 @@ export const user = (req: Request, res: Response) => {
     <h1>User Dashboard</h1>
     ${menu()}
     Session: ${req.sessionID}<br/>
-    External: ${req.session.external}
+    External: ${req.session.externalId}
     <p>User's Details from the DB.</p>
   `)
 }

@@ -7,7 +7,7 @@ import session, { SessionOptions } from 'express-session'
 import { TypeormStore } from 'typeorm-store'
 import * as dotenv from 'dotenv'
 import { typeOrm } from './middleware/orm'
-import { validate } from './middleware/validate'
+import { verify } from './shared/verify'
 import passport from 'passport'
 import { XummStrategy, iXummStrategyProps } from '../../dist/lib/passport-xumm'
 
@@ -88,7 +88,6 @@ const main = async () => {
 
   // This function is required by passport. It verifies that authentication
   // data coming in through any http request matches up with data you have in your database.
-  const verify = () => {}
   const strategyProps: iXummStrategyProps = { pubKey, pvtKey, verify }
   passport.use('xumm', new XummStrategy(strategyProps))
 
@@ -100,7 +99,14 @@ const main = async () => {
 
   // service.post('login', login) // passport.authenticate middleware normally goes here.
 
-  service.get('/user', passport.authenticate('xumm', validate), user)
+  service.get(
+    '/user',
+    passport.authenticate('xumm', {
+      successRedirect: '/user',
+      failureRedirect: '/login'
+    }),
+    user
+  )
 
   // Start the API as a web service.
   service.listen(port, () => {

@@ -6,7 +6,7 @@ export const home = async (req: Request, res: Response) => {
     <h1>Home Page</h1>
     ${menu()}
     Session: ${req.sessionID}<br/>
-    External: ${req.session.external}
+    External: ${req.session.externalId}
     <p>Home page content.</p>
   `)
 }

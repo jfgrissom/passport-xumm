@@ -1,4 +1,4 @@
-export const validate = (err: Error, user: any, info: any) => {
+export const verify = (err: Error, user: any, info: any) => {
   if (err) console.error(err)
   console.log(user)
   console.log(info)

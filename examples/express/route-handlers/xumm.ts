@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 import { XummStrategy } from '../../../dist/lib/passport-xumm'
 
-import { User } from '../entities/user'
+// import { User } from '../entities/user'
+import { verify } from '../shared/verify'
 
 // Once a request comes in check with Xumm to be sure the payload is real.
 export const xumm = async (req: Request, res: Response) => {
@@ -28,7 +29,8 @@ export const xumm = async (req: Request, res: Response) => {
   // Confirm the POST data is valid.
   const xummStrategyProps = {
     pubKey,
-    pvtKey
+    pvtKey,
+    verify
   }
   const strategy = new XummStrategy(xummStrategyProps)
 
@@ -39,12 +41,7 @@ export const xumm = async (req: Request, res: Response) => {
       userToken
     }
    */
-  const validated = await strategy.validateUserToken({ id: externalId })
-  // If it's not valid silently return a 200 to the caller and exit.
-  if (!validated) {
-    res.sendStatus(200)
-    return
-  }
+  // const validated = await strategy.authenticate
 
   /* TODO: At this point we have a validated the payload 
   The response should look like this:
@@ -60,17 +57,17 @@ export const xumm = async (req: Request, res: Response) => {
   */
 
   // We have an externalId and it's valid so get the some database repos.
-  const userRepository = await req.context.db.getRepository(User)
+  //const userRepository = await req.context.db.getRepository(User)
 
   // At this point you have a session in the DB that has this external ID within it.
   // The next thing to do is bind the session to a user.
 
   // Construct the user.
-  const user = new User()
-  user.id = validated.userToken
+  //const user = new User()
+  //user.id = validated.userToken
 
   // Go ahead and save the user. According to typeorm docs save is an "upsert".
-  userRepository.save(user)
+  //userRepository.save(user)
 
   // This is what gets returned to the caller (Xumm Service)
   // because we received their payload.

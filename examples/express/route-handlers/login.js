@@ -50,8 +50,8 @@ var login = function (req, res) { return __awaiter(void 0, void 0, void 0, funct
                 pubKey = process.env.XUMM_PUB_KEY;
                 pvtKey = process.env.XUMM_PVT_KEY;
                 identifier = (0, identifier_1.generateIdentifier)();
-                req.session.external = identifier;
-                req.context.external = identifier;
+                req.session.externalId = identifier;
+                req.context.externalId = identifier;
                 fetchQrDataProps = {
                     pubKey: pubKey,
                     pvtKey: pvtKey,

@@ -17,8 +17,8 @@ export const login = async (req: Request, res: Response) => {
     // This will be used when the request is signed and this data is
     // returned to the application.
     const identifier: string = generateIdentifier()
-    req.session.external = identifier
-    req.context.external = identifier
+    req.session.externalId = identifier
+    req.context.externalId = identifier
 
     const fetchQrDataProps: iFetchQrDataProps = {
       pubKey,

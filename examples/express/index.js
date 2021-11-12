@@ -67,7 +67,7 @@ var express_session_1 = __importDefault(require("express-session"));
 var typeorm_store_1 = require("typeorm-store");
 var dotenv = __importStar(require("dotenv"));
 var orm_1 = require("./middleware/orm");
-var validate_1 = require("./middleware/validate");
+var verify_1 = require("./shared/verify");
 var passport_1 = __importDefault(require("passport"));
 var passport_xumm_1 = require("../../dist/lib/passport-xumm");
 // Pull in the environment variables and account for them before continuing.
@@ -89,7 +89,7 @@ service.use((0, express_request_context_1["default"])());
 service.use(express_1["default"].json());
 // Bootstrap the service.
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var database, orm, sessionRepository, sessionConfig, pubKey, pvtKey, verify, strategyProps;
+    var database, orm, sessionRepository, sessionConfig, pubKey, pvtKey, strategyProps;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, (0, typeorm_1.createConnection)()];
@@ -127,8 +127,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 service.use((0, express_session_1["default"])(sessionConfig));
                 pubKey = process.env.XUMM_PUB_KEY;
                 pvtKey = process.env.XUMM_PVT_KEY;
-                verify = function () { };
-                strategyProps = { pubKey: pubKey, pvtKey: pvtKey, verify: verify };
+                strategyProps = { pubKey: pubKey, pvtKey: pvtKey, verify: verify_1.verify };
                 passport_1["default"].use('xumm', new passport_xumm_1.XummStrategy(strategyProps));
                 // Public Web endpoints.
                 service.get('/', route_handlers_1.home);
@@ -136,7 +135,10 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 service.get('/login-success', route_handlers_1.success); // User is redirected here from Xumm Service (or after a frontend websocket receives a completed message from Xumm Service).
                 service.get('/logout', route_handlers_1.logout); // Kills the session at the server and removes session data from browser cookies.
                 // service.post('login', login) // passport.authenticate middleware normally goes here.
-                service.get('/user', passport_1["default"].authenticate('xumm', validate_1.validate), route_handlers_1.user);
+                service.get('/user', passport_1["default"].authenticate('xumm', {
+                    successRedirect: '/user',
+                    failureRedirect: '/login'
+                }), route_handlers_1.user);
                 // Start the API as a web service.
                 service.listen(port, function () {
                     console.log("Example express app listening at http://localhost:" + port);
