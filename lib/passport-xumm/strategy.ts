@@ -112,6 +112,13 @@ export class XummStrategy extends PassportStrategy {
     // Retrieve the identifier from request.
     // Query has priority over session to handle redirects from Xumm Service.
     const identifier: string = req.query.externalId || req.session.externalId
+    console.log(`Identifier: ${identifier}`)
+    if (!identifier) {
+      fail({
+        message: 'Missing external identifier.',
+        BAD_REQUEST
+      })
+    }
     const url = `${this.authUrl}/${identifier}`
     const axiosConfig: AxiosRequestConfig = {
       headers: {
