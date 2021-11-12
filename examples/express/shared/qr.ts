@@ -2,6 +2,7 @@ import {
   XummStrategy,
   iXummStrategyProps
 } from '../../../dist/lib/passport-xumm'
+import { verify } from '../shared/verify'
 
 export interface iFetchQrDataProps {
   pvtKey: string
@@ -12,7 +13,7 @@ export interface iFetchQrDataProps {
 export const fetchQrData = async (props: iFetchQrDataProps) => {
   const { pvtKey, pubKey, identifier } = props
 
-  const strategyProps: iXummStrategyProps = { pubKey, pvtKey }
+  const strategyProps: iXummStrategyProps = { pubKey, pvtKey, verify }
   const xumm = new XummStrategy(strategyProps)
 
   // Get a QR code and share this id with Xumm.

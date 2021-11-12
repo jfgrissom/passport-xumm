@@ -104,8 +104,7 @@ export class XummStrategy extends PassportStrategy {
       const user = { id: req.session.userToken }
       // Account number and provider should already exist if
       // this is the case so no need to set them as info here.
-      this.success(user)
-      return
+      return this.success(user)
     }
 
     // If those conditions are not met then the user is not authenticated
@@ -116,7 +115,7 @@ export class XummStrategy extends PassportStrategy {
     const identifier: string = req.query.externalId || req.session.externalId
     console.log(`Identifier: ${identifier}`)
     if (!identifier) {
-      this.fail(
+      return this.fail(
         {
           message: 'Missing external identifier.'
         },
@@ -147,7 +146,7 @@ export class XummStrategy extends PassportStrategy {
       const info = { account: account, provider: 'xumm' }
       this.success(user, info)
     } else {
-      this.fail(
+      return this.fail(
         {
           message:
             'Payload received could not be verified with Xumm web service.'

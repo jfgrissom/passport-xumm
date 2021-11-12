@@ -3,6 +3,7 @@ import { Request, Response } from 'express'
 import { User } from '../entities/user'
 import { generateIdentifier } from '../shared/identifier'
 import { fetchQrData, iFetchQrDataProps } from '../shared/qr'
+// import { verify } from '../shared/verify'
 
 export const qr = async (req: Request, res: Response) => {
   const pubKey = process.env.XUMM_PUB_KEY

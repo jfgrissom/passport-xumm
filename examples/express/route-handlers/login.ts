@@ -42,7 +42,7 @@ export const login = async (req: Request, res: Response) => {
         the user has authenticated.
       </p>
       Session: ${req.sessionID}<br/>
-      External: ${req.session.external}
+      External: ${req.session.externalId}
     `)
     return
   }

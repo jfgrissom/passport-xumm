@@ -40,6 +40,7 @@ exports.qr = void 0;
 var user_1 = require("../entities/user");
 var identifier_1 = require("../shared/identifier");
 var qr_1 = require("../shared/qr");
+// import { verify } from '../shared/verify'
 var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var pubKey, pvtKey, userRepository, user, savedUser, identifier, fetchQrDataProps, qrCodeData, responseData;
     return __generator(this, function (_a) {
