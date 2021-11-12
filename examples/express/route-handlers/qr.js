@@ -61,7 +61,7 @@ var qr = function (req, res) { return __awaiter(void 0, void 0, void 0, function
                 savedUser = _a.sent();
                 console.log("Created User: " + user.name + " " + savedUser.id);
                 identifier = (0, identifier_1.generateIdentifier)();
-                req.session.external = identifier;
+                req.session.externalId = identifier;
                 fetchQrDataProps = {
                     pubKey: pubKey,
                     pvtKey: pvtKey,

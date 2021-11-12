@@ -7,6 +7,7 @@ import session, { SessionOptions } from 'express-session'
 import { TypeormStore } from 'typeorm-store'
 import * as dotenv from 'dotenv'
 import { typeOrm } from './middleware/orm'
+import { validate } from './middleware/validate'
 import passport from 'passport'
 import { XummStrategy, iXummStrategyProps } from '../../dist/lib/passport-xumm'
 
@@ -74,6 +75,7 @@ const main = async () => {
   // Local API endpoints
   // These are put before we add sessions to the service because these should not support sessions.
   // They expect authentication headers with every request.
+  // Also these don't require auth.
   service.get('/api/qr', qr)
   service.post('/api/xumm', xumm)
 
@@ -98,8 +100,7 @@ const main = async () => {
 
   // service.post('login', login) // passport.authenticate middleware normally goes here.
 
-  // Private Web endpoints.
-  service.get('/user', user)
+  service.get('/user', passport.authenticate('xumm', validate), user)
 
   // Start the API as a web service.
   service.listen(port, () => {

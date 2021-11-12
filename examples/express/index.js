@@ -67,6 +67,7 @@ var express_session_1 = __importDefault(require("express-session"));
 var typeorm_store_1 = require("typeorm-store");
 var dotenv = __importStar(require("dotenv"));
 var orm_1 = require("./middleware/orm");
+var validate_1 = require("./middleware/validate");
 var passport_1 = __importDefault(require("passport"));
 var passport_xumm_1 = require("../../dist/lib/passport-xumm");
 // Pull in the environment variables and account for them before continuing.
@@ -119,6 +120,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // Local API endpoints
                 // These are put before we add sessions to the service because these should not support sessions.
                 // They expect authentication headers with every request.
+                // Also these don't require auth.
                 service.get('/api/qr', route_handlers_1.qr);
                 service.post('/api/xumm', route_handlers_1.xumm);
                 // Apply the Session middleware to the service.
@@ -134,8 +136,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 service.get('/login-success', route_handlers_1.success); // User is redirected here from Xumm Service (or after a frontend websocket receives a completed message from Xumm Service).
                 service.get('/logout', route_handlers_1.logout); // Kills the session at the server and removes session data from browser cookies.
                 // service.post('login', login) // passport.authenticate middleware normally goes here.
-                // Private Web endpoints.
-                service.get('/user', route_handlers_1.user);
+                service.get('/user', passport_1["default"].authenticate('xumm', validate_1.validate), route_handlers_1.user);
                 // Start the API as a web service.
                 service.listen(port, function () {
                     console.log("Example express app listening at http://localhost:" + port);
