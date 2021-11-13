@@ -72,13 +72,6 @@ const main = async () => {
     }
   }
 
-  // Local API endpoints
-  // These are put before we add sessions to the service because these should not support sessions.
-  // They expect authentication headers with every request.
-  // Also these don't require auth.
-  service.get('/api/qr', qr)
-  service.post('/api/xumm', xumm)
-
   // Apply the Session middleware to the service.
   service.use(session(sessionConfig))
 
@@ -91,11 +84,43 @@ const main = async () => {
   const strategyProps: iXummStrategyProps = { pubKey, pvtKey, verify }
   passport.use('xumm', new XummStrategy(strategyProps))
 
+  // Initialize passport
+  service.use(passport.initialize())
+
+  // Extend express sessions with passport session.
+  service.use(passport.session())
+
+  // Local API endpoints
+  // Also these don't require auth.
+  service.get('/api/qr', qr)
+  service.post('/api/xumm', xumm)
+
   // Public Web endpoints.
   service.get('/', home)
-  service.get('/login', login) // Prompts the user to login with Xumm.
-  service.get('/login-success', success) // User is redirected here from Xumm Service (or after a frontend websocket receives a completed message from Xumm Service).
-  service.get('/logout', logout) // Kills the session at the server and removes session data from browser cookies.
+  service.get(
+    '/login',
+    passport.authenticate('xumm', {
+      successRedirect: '/user',
+      failureRedirect: '/login'
+    }),
+    login
+  ) // Prompts the user to login with Xumm.
+  service.get(
+    '/login-success',
+    passport.authenticate('xumm', {
+      successRedirect: '/user',
+      failureRedirect: '/login'
+    }),
+    success
+  ) // User is redirected here from Xumm Service (or after a frontend websocket receives a completed message from Xumm Service).
+  service.get(
+    '/logout',
+    passport.authenticate('xumm', {
+      successRedirect: '/user',
+      failureRedirect: '/login'
+    }),
+    logout
+  ) // Kills the session at the server and removes session data from browser cookies.
 
   // service.post('login', login) // passport.authenticate middleware normally goes here.
 

@@ -1,6 +1,10 @@
-import { Strategy as PassportStrategy } from 'passport-strategy'
+import { Strategy } from 'passport-strategy'
 import axios, { AxiosRequestConfig } from 'axios'
 import { XummSdk, XummTypes } from 'xumm-sdk'
+import { Request } from 'express'
+
+// Define the type of callback that can be passed in.
+type DoneCallback = (err: Error | null, user?: unknown, info?: unknown) => void
 
 /*
   This is the main interface to the XummStrategy Class.
@@ -14,7 +18,7 @@ export interface iXummStrategyProps {
   pubKey: string
   pvtKey: string
   timeout?: number
-  verify: Function
+  verify: DoneCallback
 }
 
 /*
@@ -52,7 +56,7 @@ const NOT_AUTHENTICATED = 401
   The credentials (pubKey, pvtKey) are values you get from https://apps.xumm.dev/.
   Please read https://xumm.readme.io/docs/register-your-app for details.
  */
-export class XummStrategy extends PassportStrategy {
+export class XummStrategy extends Strategy {
   constructor(props: iXummStrategyProps) {
     super()
     const { pubKey, pvtKey, timeout, verify } = props
@@ -77,11 +81,15 @@ export class XummStrategy extends PassportStrategy {
   public timeout: number
   public pubKey: string
   public authUrl: string // Expose this so it's easy to change and unit test with.
-  public verify: Function
+  public verify: DoneCallback
 
   // Explicitly define private props
   private _pvtKey: string // Restricting this value to this class only.
   private _sdk: XummSdk // Don't expose the SDK to any consumer of this lib.
+
+  fail = (challenge?: any, status?: number) => {
+    console.error(`Failing: ${challenge}: ${status}`)
+  }
 
   /*
     A person who has signed the "SignIn" transaction has been authenticated.
@@ -113,7 +121,6 @@ export class XummStrategy extends PassportStrategy {
     // Retrieve the identifier from request.
     // Query has priority over session to handle redirects from Xumm Service.
     const identifier: string = req.query.externalId || req.session.externalId
-    console.log(`Identifier: ${identifier}`)
     if (!identifier) {
       return this.fail(
         {
